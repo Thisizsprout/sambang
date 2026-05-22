@@ -19,8 +19,6 @@
         .bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes bounceIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .progress-bar { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        
-        /* 언어 드롭다운 부드러운 애니메이션 */
         .dropdown-menu {
             opacity: 0;
             transform: translateY(-8px) scale(0.95);
@@ -51,7 +49,7 @@
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <button onclick="toggleLangDropdown(event)" id="lang-btn" class="flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer shadow-sm">
-                        <i class="fa-solid fa-globe text-indigo-500 animate-spin-slow"></i>
+                        <i class="fa-solid fa-globe text-indigo-500"></i>
                         <span id="current-lang">한국어</span>
                         <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
                     </button>
@@ -73,7 +71,6 @@
     </header>
 
     <main class="max-w-5xl w-full mx-auto px-6 py-8 flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 bounce-in">
-        
         <div class="md:col-span-1 flex flex-col gap-6">
             <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-400 to-purple-400"></div>
@@ -94,15 +91,15 @@
                 </h3>
                 <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-3.5 leading-relaxed">
                     <li class="flex gap-3 bg-rose-50/40 dark:bg-rose-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1 shrink-0 shadow-sm shadow-rose-200"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1 shrink-0"></span>
                         <span><strong id="guide-high" class="text-slate-800 dark:text-slate-200">많음:</strong> 도로 내에 차량이 정체되거나 밀집도가 포화 상태인 경우</span>
                     </li>
                     <li class="flex gap-3 bg-amber-50/40 dark:bg-amber-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 mt-1 shrink-0 shadow-sm shadow-amber-200"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 mt-1 shrink-0"></span>
                         <span><strong id="guide-mid" class="text-slate-800 dark:text-slate-200">보통:</strong> 차량 흐름이 서행 상태이거나 일정 수준 유입된 경우</span>
                     </li>
                     <li class="flex gap-3 bg-emerald-50/40 dark:bg-emerald-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0 shadow-sm shadow-emerald-200"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
                         <span><strong id="guide-low" class="text-slate-800 dark:text-slate-200">적음:</strong> 소통이 원활하고 도로의 잔여 공간이 여유로운 경우</span>
                     </li>
                 </ul>
@@ -111,7 +108,6 @@
 
         <div class="md:col-span-2 flex flex-col gap-6">
             <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm flex flex-col items-center justify-center min-h-[340px] relative overflow-hidden group">
-                
                 <div id="drop-zone" class="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 dark:border-slate-700 rounded-2xl p-8 hover:bg-gradient-to-br hover:from-indigo-50/30 hover:to-purple-50/30 dark:hover:from-indigo-950/10 dark:hover:to-slate-900 hover:border-indigo-400 transition duration-300 cursor-pointer relative" onclick="triggerFileInput()">
                     <input type="file" id="image-selector" accept="image/*" class="hidden" onchange="previewAndPredict(this)">
                     <div class="w-16 h-16 bg-indigo-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-indigo-500 dark:text-indigo-400 group-hover:scale-110 group-hover:rotate-6 transition duration-300 mb-4 shadow-inner">
@@ -122,7 +118,6 @@
                 </div>
 
                 <img id="image-preview" src="#" alt="미리보기" class="hidden max-h-80 w-full object-contain rounded-2xl border border-slate-100 dark:border-slate-800 shadow-md">
-                
                 <button id="btn-reset" onclick="resetImage()" class="hidden absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-900 text-white dark:bg-slate-800/90 dark:hover:bg-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 cursor-pointer backdrop-blur-sm">
                     <i class="fa-solid fa-arrow-rotate-left mr-1"></i> <span id="txt-btn-change">변경</span>
                 </button>
@@ -132,7 +127,6 @@
                 <h2 id="title-result" class="text-base font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-chart-simple text-purple-500"></i> 실시간 분석 결과
                 </h2>
-                
                 <div id="label-container" class="space-y-4">
                     <div id="txt-placeholder" class="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
                         <i class="fa-solid fa-wand-magic-sparkles text-xl mb-2.5 block text-indigo-300 dark:text-indigo-800 animate-pulse"></i>
@@ -155,7 +149,7 @@
             ko: {
                 modelLoading: "AI 분석 엔진 가동 준비 중...",
                 modelReady: "차량 데이터 분석 준비 완료",
-                modelError: "로컬 모델을 찾을 수 없습니다. (동일 폴더 내 파일 존재 여부 확인)",
+                modelError: "깃허브 내 모델 파일 파일 구조를 확인해주세요.",
                 uploadTitle: "분석할 차량 이미지를 등록하세요",
                 uploadDesc: "클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그",
                 placeholder: "이미지를 업로드하면 차량 혼잡도 분석 보고서가 표시됩니다.",
@@ -173,7 +167,7 @@
             en: {
                 modelLoading: "Initializing AI Analysis Engine...",
                 modelReady: "Traffic Model Ready for Analysis",
-                modelError: "Local model not found. Check files in the same directory.",
+                modelError: "Please check the model files structure in GitHub.",
                 uploadTitle: "Register Vehicle Image to Analyze",
                 uploadDesc: "Click to take photo/select gallery or drag file here",
                 placeholder: "Upload an image to display the traffic congestion report.",
@@ -189,17 +183,17 @@
                 labelHigh: "Heavy", labelMid: "Moderate", labelLow: "Light"
             },
             ja: {
-                modelLoading: "AI分析エンジン起動準備중...",
+                modelLoading: "AI分析エンジン起動準備中...",
                 modelReady: "車両データ分析準備完了",
-                modelError: "ローカルモデルが見つかりません。同じフォルダ内のファイルを確認してください。",
+                modelError: "GitHub内のモデルファイル構造を確認してください。",
                 uploadTitle: "分析する車両画像を登録してください",
-                uploadDesc: "クリックして撮影/ギャラリー選択またはファイルをドラッグ",
+                uploadDesc: "クリックして撮影/ギャラリー選択 또는 파일을 드래그",
                 placeholder: "画像をアップロードすると、車両混雑度分析レポートが表示されます。",
                 titleStatus: "システム状態",
                 descStatus: "内蔵されたAI解凍モデルを読み込みます。同じフォルダ内の重み情報に基づいてリアルタイム推論を即座に実行します。",
                 titleGuide: "データ分析基準",
                 guideHigh: "多い:", guideHighDesc: " 道路内で車両が渋滞しているか、密度が飽和状態の場合",
-                guideMid: "普通:", guideMidDesc: " 車の流れが徐행状態、または一定水準流入している場合",
+                guideMid: "普通:", guideMidDesc: " 車の流れが徐行状態、または一定水準流入している場合",
                 guideLow: "少ない:", guideLowDesc: " スムーズに流れており、道路の残りの空間に余裕がある場合",
                 titleResult: "リアルタイム分析結果",
                 btnChange: "変更",
@@ -209,7 +203,7 @@
             zh: {
                 modelLoading: "AI分析引擎正在初始化...",
                 modelReady: "车辆数据分析准备就绪",
-                modelError: "找不到本地模型。请检查同文件夹下的文件。",
+                modelError: "请检查GitHub中的模型文件结构。",
                 uploadTitle: "请上传要分析的车辆图片",
                 uploadDesc: "点击拍照/选择相册或将文件拖拽至此",
                 placeholder: "上传图片后将在此显示车辆拥堵度分析报告。",
@@ -217,7 +211,7 @@
                 descStatus: "加载内置的AI解压模型。基于同文件夹下的权重信息，立即进行实时推理计算。",
                 titleGuide: "数据分析标准",
                 guideHigh: "拥堵:", guideHighDesc: " 道路内车辆停滞或密度达到饱和状态。",
-                guideMid: "缓行:", guideMidDesc: " 车流缓慢或有一定程度的车辆汇入。",
+                guideMid: "缓行:", guideMidDesc: " 车流缓慢或有一定程度 of 车辆汇入。",
                 guideLow: "畅通:", guideLowDesc: " 交通顺畅，道路留有充裕空间。",
                 titleResult: "实时分析结果",
                 btnChange: "更改",
@@ -227,7 +221,7 @@
             es: {
                 modelLoading: "Iniciando el motor de análisis IA...",
                 modelReady: "Modelo de tráfico listo para análisis",
-                modelError: "No se encontró el modelo local. Revise los archivos en la misma carpeta.",
+                modelError: "Por favor, verifique la estructura de archivos en GitHub.",
                 uploadTitle: "Registre la imagen del vehículo para analizar",
                 uploadDesc: "Haga clic para tomar foto/seleccionar galería o arrastre el archivo",
                 placeholder: "Suba una imagen para mostrar el informe de congestión de tráfico.",
@@ -243,19 +237,22 @@
                 labelHigh: "Alto", labelMid: "Moderado", labelLow: "Bajo"
             }
         };
-
         let currentLangCode = 'ko';
     </script>
 
     <script>
-        // 조건 1 반영: 압축을 해제한 '동일 폴더 로컬 경로(./)'에서 모델 핵심 가중치를 호출
-        const MODEL_URL = "./"; 
+        // ✨ [핵심 수정] 깃허브 페이지스 환경에 맞춘 유연한 절대 경로 자동 추출
+        const getBaseUrl = () => {
+            const loc = window.location;
+            // 깃허브 주소 끝부분의 index.html을 잘라내어 베이스 경로 확보
+            return loc.protocol + '//' + loc.host + loc.pathname.substring(0, loc.pathname.lastIndexOf('/')) + '/';
+        };
 
+        const MODEL_URL = getBaseUrl(); 
         let model, maxPredictions;
         let isModelLoaded = false;
-        let lastPredictionsData = null; // 실시간 언어 교체 시 결과 보존용 변수
+        let lastPredictionsData = null;
 
-        // 드래그 앤 드롭 기본 헨들링
         const dropZone = document.getElementById('drop-zone');
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => { 
@@ -282,11 +279,10 @@
             document.getElementById('image-selector').click();
         }
 
-        // 페이지 가동 시 압축 푼 로컬 파일(model.json, weights.bin, metadata.json)을 연결
         async function autoInitModel() {
             const statusDiv = document.getElementById("model-status");
             try {
-                // 티처블 머신 라이브러리 규격 매핑
+                // ⚙️ 깃허브 배포 환경을 고려한 명시적 대소문자 고정 및 주소 주입
                 model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
                 maxPredictions = model.getTotalClasses();
                 isModelLoaded = true;
@@ -294,20 +290,18 @@
                 statusDiv.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 animate-bounce"></i> <span>${i18n[currentLangCode].modelReady}</span>`;
                 statusDiv.className = "flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/30 px-3.5 py-3 rounded-2xl font-bold border border-emerald-100/60 dark:border-emerald-900/40";
             } catch (e) {
-                console.error("Local model initialization failure:", e);
+                console.error("GitHub Core Model loading failed:", e);
                 statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span>${i18n[currentLangCode].modelError}</span>`;
                 statusDiv.className = "flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30 px-3.5 py-3 rounded-2xl font-bold border border-rose-100/60 dark:border-rose-900/40";
             }
         }
 
-        // 비동기 이미지 프리뷰 업로드 버그 수정 적용부
         function previewAndPredict(input) {
             const file = input.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const imgPreview = document.getElementById('image-preview');
-                    
                     imgPreview.onload = function() {
                         imgPreview.classList.remove('hidden');
                         imgPreview.classList.add('block');
@@ -329,7 +323,6 @@
             }
         }
 
-        // 핵심 인공지능 추론 분석 기제
         async function predict() {
             if (!isModelLoaded) return;
             const image = document.getElementById("image-preview");
@@ -339,11 +332,10 @@
             }
 
             const prediction = await model.predict(image);
-            lastPredictionsData = prediction; // 상태 스토어에 보존
+            lastPredictionsData = prediction;
             renderResults(prediction);
         }
 
-        // 결과를 화면에 그리는 함수
         function renderResults(prediction) {
             const labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = ""; 
@@ -351,10 +343,9 @@
             const highestPredict = [...prediction].sort((a,b) => b.probability - a.probability)[0];
 
             for (let i = 0; i < maxPredictions; i++) {
-                const originalName = prediction[i].className; // "많음", "보통", "적음"
+                const originalName = prediction[i].className;
                 const probability = (prediction[i].probability * 100).toFixed(1);
                 
-                // 조건 2 반영: 학습 라벨명("많음", "보통", "적음")을 다국어 변환 테이블과 일대일로 맵핑 처리
                 let translatedName = originalName;
                 if(originalName === "많음") translatedName = i18n[currentLangCode].labelHigh;
                 else if(originalName === "보통") translatedName = i18n[currentLangCode].labelMid;
@@ -405,7 +396,6 @@
                 </div>`;
         }
 
-        // 조건 3 해결: 테일윈드 CSS 표준 테마 토글 버그 수정
         function toggleTheme() {
             const html = document.documentElement;
             if (html.classList.contains('dark')) {
@@ -419,7 +409,6 @@
             }
         }
 
-        // 조건 2 해결: 다국어 스위칭 시 모든 구성요소가 완전 상호 연동되도록 수정
         function toggleLangDropdown(e) {
             e.stopPropagation();
             document.getElementById('lang-dropdown').classList.toggle('show');
@@ -429,20 +418,16 @@
             currentLangCode = langCode;
             document.getElementById('current-lang').innerText = langName;
             document.getElementById('lang-dropdown').classList.remove('show');
-            
             updateUILanguage();
         }
 
         function updateUILanguage() {
             const data = i18n[currentLangCode];
-            
-            // 1. 모델 연동 상태창 갱신
             const statusTextSpan = document.getElementById('txt-model-loading');
             if (statusTextSpan) {
                 statusTextSpan.innerText = isModelLoaded ? data.modelReady : data.modelLoading;
             }
             
-            // 2. 가이드라인 및 서브 패널 완벽 갱신
             document.getElementById('title-status').innerHTML = `<i class="fa-solid fa-circle-nodes text-indigo-500"></i> ${data.titleStatus}`;
             document.getElementById('desc-status').innerText = data.descStatus;
             document.getElementById('title-guide').innerHTML = `<i class="fa-solid fa-graduationcap text-purple-500"></i> ${data.titleGuide}`;
@@ -454,30 +439,25 @@
             document.getElementById('guide-low').innerText = data.guideLow;
             document.getElementById('guide-low').nextSibling.textContent = data.guideLowDesc;
             
-            // 3. 메인 업로드 폼 컨텐츠 갱신
             document.getElementById('txt-upload-title').innerText = data.uploadTitle;
             document.getElementById('txt-upload-desc').innerText = data.uploadDesc;
             document.getElementById('title-result').innerHTML = `<i class="fa-solid fa-chart-simple text-purple-500"></i> ${data.titleResult}`;
             document.getElementById('txt-btn-change').innerText = data.btnChange;
             
-            // 4. 플레이스 홀더 텍스트 보정
             const placeholderText = document.getElementById('txt-placeholder-text');
             if (placeholderText) {
                 placeholderText.innerText = data.placeholder;
             }
             
-            // 5. 이미 분석 데이터 결과가 존재하는 상태라면 다국어 라벨 즉시 재렌더링
             if (lastPredictionsData) {
                 renderResults(lastPredictionsData);
             }
         }
 
-        // 외부 영역 클릭 시 언어 드롭다운 자동으로 닫기 처리
         window.addEventListener('click', function() {
             document.getElementById('lang-dropdown').classList.remove('show');
         });
 
-        // 초기 시스템 초기 테마 및 파일 바인딩 로드
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
