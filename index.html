@@ -28,7 +28,7 @@
                 </div>
                 <span class="font-bold text-lg tracking-tight text-slate-900">CrowdEye AI</span>
             </div>
-            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">v1.0 Live</span>
+            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">v1.1 Mobile Ready</span>
         </div>
     </header>
 
@@ -71,10 +71,10 @@
                 <div id="drop-zone" class="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-8 hover:bg-indigo-50/30 hover:border-indigo-300 transition cursor-pointer relative" onclick="triggerFileInput()">
                     <input type="file" id="image-selector" accept="image/*" class="hidden" onchange="previewAndPredict(this)">
                     <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition duration-300 mb-4">
-                        <i class="fa-solid fa-images text-xl"></i>
+                        <i class="fa-solid fa-camera-retro text-xl"></i>
                     </div>
-                    <p class="text-sm font-semibold text-slate-700 mb-1">분석할 이미지를 업로드하세요</p>
-                    <p class="text-xs text-slate-400">클릭하거나 이미지를 드래그 앤 드롭</p>
+                    <p class="text-sm font-semibold text-slate-700 mb-1 text-center">분석할 이미지를 등록하세요</p>
+                    <p class="text-xs text-slate-400 text-center px-4 md:px-0">클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그</p>
                 </div>
 
                 <img id="image-preview" src="#" alt="미리보기" class="hidden max-h-72 w-full object-contain rounded-xl border border-slate-100 shadow-sm">
@@ -122,8 +122,9 @@
             const dt = e.dataTransfer;
             const files = dt.files;
             if(files.length > 0) {
-                document.getElementById('image-selector').files = files;
-                previewAndPredict(document.getElementById('image-selector'));
+                const selector = document.getElementById('image-selector');
+                selector.files = files;
+                previewAndPredict(selector);
             }
         });
 
@@ -141,7 +142,6 @@
                 return;
             }
 
-            // URL 끝에 슬래시 처리 자동 보정
             const modelURL = urlInput.endsWith('/') ? urlInput + "model.json" : urlInput + "/model.json";
             const metadataURL = urlInput.endsWith('/') ? urlInput + "metadata.json" : urlInput + "/metadata.json";
 
@@ -156,7 +156,6 @@
                 statusDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> 모델이 성공적으로 연결되었습니다!`;
                 statusDiv.className = "mt-4 flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 px-3 py-2.5 rounded-lg font-medium border border-emerald-100";
                 
-                // 모델 로드 후 이미지가 이미 올라와 있다면 바로 분석 실행
                 if(document.getElementById('image-preview').classList.contains('block')) {
                     predict();
                 }
@@ -168,32 +167,35 @@
             }
         }
 
-        // 2. 이미지 업로드 시 미리보기 기능
+        // 2. [버그 수정 완료] 이미지 업로드 시 미리보기 기능 최적화
         function previewAndPredict(input) {
             const file = input.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const imgPreview = document.getElementById('image-preview');
+                    
+                    // 비동기 렌더링 지연으로 인한 이미지 공백 버그 방지 (onload 핸들러 추가 후 경로 할당)
+                    imgPreview.onload = function() {
+                        imgPreview.classList.remove('hidden');
+                        imgPreview.classList.add('block');
+                        document.getElementById('drop-zone').classList.add('hidden');
+                        document.getElementById('btn-reset').classList.remove('hidden');
+                        
+                        if (isModelLoaded) {
+                            predict();
+                        } else {
+                            initEmptyLabelLayout();
+                        }
+                    };
+                    
                     imgPreview.src = e.target.result;
-                    imgPreview.classList.remove('hidden');
-                    imgPreview.classList.add('block');
-                    
-                    document.getElementById('drop-zone').classList.add('hidden');
-                    document.getElementById('btn-reset').classList.remove('hidden');
-                    
-                    // 모델이 로드된 상태라면 즉시 예측 진행
-                    if (isModelLoaded) {
-                        predict();
-                    } else {
-                        initEmptyLabelLayout();
-                    }
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        // 3. 모델 미등록 상태에서 이미지 먼저 넣었을 때의 결과 UI 처리
+        // 3. 미등록 상태 가이드 라인
         function initEmptyLabelLayout() {
             const labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = `
@@ -202,29 +204,33 @@
                 </div>`;
         }
 
-        // 4. 티처블 머신 메커니즘을 통한 핵심 예측 알고리즘
+        // 4. 핵심 분석 알고리즘 (많음, 보통, 적음 추출)
         async function predict() {
             if (!isModelLoaded) return;
             
             const image = document.getElementById("image-preview");
+            
+            // 이미지 엘리먼트가 정상적으로 완전히 메모리에 로드된 상태에서만 분석 처리 실행
+            if (!image.complete || image.naturalWidth === 0) {
+                setTimeout(predict, 100);
+                return;
+            }
+
             const prediction = await model.predict(image);
             const labelContainer = document.getElementById("label-container");
-            labelContainer.innerHTML = ""; // 기존 내용 초기화
+            labelContainer.innerHTML = ""; 
 
-            // 확률이 가장 높은 순으로 정렬해서 강조 효과 부여하기 위함
             const highestPredict = [...prediction].sort((a,b) => b.probability - a.probability)[0];
 
             for (let i = 0; i < maxPredictions; i++) {
                 const className = prediction[i].className;
                 const probability = (prediction[i].probability * 100).toFixed(1);
                 
-                // 확률에 따른 프로그레스 바 색상 배치 지정
                 let colorClass = "bg-slate-400";
                 if (className === "많음") colorClass = "bg-rose-500";
                 else if (className === "보통") colorClass = "bg-amber-400";
                 else if (className === "적음") colorClass = "bg-emerald-500";
 
-                // 가장 높은 예측 상태 카드는 스케일 강조 애니메이션 적용
                 const isHighest = prediction[i].className === highestPredict.className && highestPredict.probability > 0.1;
                 const activeStyle = isHighest ? 'border-indigo-200 bg-indigo-50/20 shadow-sm scale-[1.01]' : 'border-slate-100';
 
@@ -246,9 +252,24 @@
             }
         }
 
-        // 5. 이미지 리셋 리액션
+        // 5. 이미지 리셋
         function resetImage() {
             document.getElementById('image-selector').value = "";
             const imgPreview = document.getElementById('image-preview');
             imgPreview.src = "#";
-            imgPreview
+            imgPreview.classList.remove('block');
+            imgPreview.classList.add('hidden');
+            
+            document.getElementById('drop-zone').classList.remove('hidden');
+            document.getElementById('btn-reset').classList.add('hidden');
+            
+            const labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = `
+                <div class="text-center py-6 text-slate-400 text-sm">
+                    <i class="fa-solid fa-robot text-lg mb-2 block"></i>
+                    이미지를 업로드하면 실시간 혼잡도 분석 리포트가 표시됩니다.
+                </div>`;
+        }
+    </script>
+</body>
+</html>
