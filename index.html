@@ -1,129 +1,253 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 혼잡도 분석 시스템</title>
+    <title>AI 차량 혼잡도 분석 시스템</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4-alpha2/dist/teachablemachine-image.min.js"></script>
 
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        .fade-in { animation: fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .progress-bar { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* 언어 드롭다운 애니메이션 */
+        .dropdown-menu {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .dropdown-menu.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between text-slate-800">
+<body class="min-h-screen flex flex-col justify-between bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md bg-white/80">
+    <header class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 backdrop-blur-md">
         <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                    <i class="fa-solid fa-chart-pie text-sm"></i>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200 dark:shadow-none">
+                    <i class="fa-solid fa-car-rear text-sm"></i>
                 </div>
-                <span class="font-bold text-lg tracking-tight text-slate-900">CrowdEye AI</span>
+                <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">TrafficEye AI</span>
             </div>
-            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">v1.1 Mobile Ready</span>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button onclick="toggleLangDropdown()" id="lang-btn" class="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-globe text-indigo-500"></i>
+                        <span id="current-lang">한국어</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                    </button>
+                    <div id="lang-dropdown" class="dropdown-menu absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl py-1.5 z-50">
+                        <button onclick="selectLanguage('ko', '한국어')" class="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50 dark:hover:bg-slate-700 font-medium transition flex items-center justify-between">한국어</button>
+                        <button onclick="selectLanguage('en', 'English')" class="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50 dark:hover:bg-slate-700 font-medium transition flex items-center justify-between">English</button>
+                        <button onclick="selectLanguage('ja', '日本語')" class="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50 dark:hover:bg-slate-700 font-medium transition flex items-center justify-between">日本語</button>
+                        <button onclick="selectLanguage('zh', '中文')" class="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50 dark:hover:bg-slate-700 font-medium transition flex items-center justify-between">中文</button>
+                        <button onclick="selectLanguage('es', 'Español')" class="w-full text-left px-4 py-2 text-xs hover:bg-indigo-50 dark:hover:bg-slate-700 font-medium transition flex items-center justify-between">Español</button>
+                    </div>
+                </div>
+
+                <button onclick="toggleTheme()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 cursor-pointer" id="theme-btn">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl w-full mx-auto px-6 py-10 flex-1 grid grid-cols-1 md:grid-cols-3 gap-8 fade-in">
         
         <div class="md:col-span-1 flex flex-col gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h2 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-gear text-indigo-500"></i> 모델 연결하기
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm">
+                <h2 id="title-status" class="text-base font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-nodes text-indigo-500"></i> 시스템 상태
                 </h2>
-                <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                    티처블 머신에서 내보내기(Export)한 파일 중 <strong>model.json</strong>이 있는 폴더 경로 주소를 입력하거나, 공유 링크(URL)를 입력해주세요.
+                <p id="desc-status" class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                    차량 혼잡도 측정 전용 AI 모델이 시스템에 내장되어 있습니다. 이미지를 올리면 별도의 연결 과정 없이 즉각 분석을 수행합니다.
                 </p>
-                <div class="flex flex-col gap-2">
-                    <input type="text" id="model-url-input" 
-                           placeholder="https://teachablemachine.withgoogle.com/models/..." 
-                           class="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-600 bg-slate-50/50">
-                    <button id="btn-load-model" onclick="loadModel()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-2.5 rounded-lg transition shadow-sm active:scale-[0.98]">
-                        <i class="fa-solid fa-cloud-arrow-down mr-1"></i> 모델 불러오기
-                    </button>
-                </div>
-                <div id="model-status" class="mt-4 flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2.5 rounded-lg font-medium border border-amber-100">
-                    <i class="fa-solid fa-circle-exclamation animate-pulse"></i> 모델을 먼저 로드해주세요.
+                <div id="model-status" class="flex items-center gap-2.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/40 px-3 py-3 rounded-xl font-semibold border border-indigo-100/70 dark:border-indigo-900/50">
+                    <i class="fa-solid fa-spinner animate-spin"></i> <span id="txt-model-loading">AI 분석 엔진 가동 준비 중...</span>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hidden md:block">
-                <h3 class="text-sm font-bold text-slate-900 mb-3"><i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> 활용 가이드</h3>
-                <ul class="text-xs text-slate-500 space-y-2.5 leading-relaxed">
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> <span><strong>많음:</strong> 대기 줄이 길거나 밀집도가 높은 상태</span></li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> <span><strong>보통:</strong> 대기 인원이 원활하게 순환되는 상태</span></li>
-                    <li class="flex gap-2"><i class="fa-solid fa-check text-indigo-500 mt-0.5"></i> <span><strong>적음:</strong> 대기 없이 즉시 이용 가능한 여유로운 상태</span></li>
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm hidden md:block">
+                <h3 id="title-guide" class="text-sm font-bold text-slate-900 dark:text-white mb-3"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> 데이터 분석 기준</h3>
+                <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-3 leading-relaxed">
+                    <li class="flex gap-2.5"><span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></span><span><strong id="guide-high" class="text-slate-700 dark:text-slate-300">많음:</strong> 도로 내에 차량이 정체되거나 밀집도가 포화 상태인 경우</span></li>
+                    <li class="flex gap-2.5"><span class="w-2 h-2 rounded-full bg-amber-400 mt-1.5 shrink-0"></span><span><strong id="guide-mid" class="text-slate-700 dark:text-slate-300">보통:</strong> 차량 흐름이 서행 상태이거나 일정 수준 유입된 경우</span></li>
+                    <li class="flex gap-2.5"><span class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span><span><strong id="guide-low" class="text-slate-700 dark:text-slate-300">적음:</strong> 소통이 원활하고 도로의 잔여 공간이 여유로운 경우</span></li>
                 </ul>
             </div>
         </div>
 
         <div class="md:col-span-2 flex flex-col gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[320px] relative overflow-hidden group">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm flex flex-col items-center justify-center min-h-[340px] relative overflow-hidden group">
                 
-                <div id="drop-zone" class="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-8 hover:bg-indigo-50/30 hover:border-indigo-300 transition cursor-pointer relative" onclick="triggerFileInput()">
+                <div id="drop-zone" class="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/10 hover:border-indigo-400 dark:hover:border-indigo-500 transition duration-300 cursor-pointer relative" onclick="triggerFileInput()">
                     <input type="file" id="image-selector" accept="image/*" class="hidden" onchange="previewAndPredict(this)">
-                    <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition duration-300 mb-4">
-                        <i class="fa-solid fa-camera-retro text-xl"></i>
+                    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:scale-110 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition duration-300 mb-4 shadow-inner">
+                        <i class="fa-solid fa-camera text-2xl"></i>
                     </div>
-                    <p class="text-sm font-semibold text-slate-700 mb-1 text-center">분석할 이미지를 등록하세요</p>
-                    <p class="text-xs text-slate-400 text-center px-4 md:px-0">클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그</p>
+                    <p id="txt-upload-title" class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 text-center">분석할 차량 이미지를 등록하세요</p>
+                    <p id="txt-upload-desc" class="text-xs text-slate-400 dark:text-slate-500 text-center px-4">클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그</p>
                 </div>
 
-                <img id="image-preview" src="#" alt="미리보기" class="hidden max-h-72 w-full object-contain rounded-xl border border-slate-100 shadow-sm">
+                <img id="image-preview" src="#" alt="미리보기" class="hidden max-h-80 w-full object-contain rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm transition duration-300">
                 
-                <button id="btn-reset" onclick="resetImage()" class="hidden absolute top-4 right-4 bg-white/90 hover:bg-white text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition active:scale-95">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> 변경
+                <button id="btn-reset" onclick="resetImage()" class="hidden absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-md transition active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> <span id="txt-btn-change">변경</span>
                 </button>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm">
+                <h2 id="title-result" class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-square-poll-vertical text-indigo-500"></i> 실시간 분석 결과
                 </h2>
                 
                 <div id="label-container" class="space-y-4">
-                    <div class="text-center py-6 text-slate-400 text-sm">
-                        <i class="fa-solid fa-robot text-lg mb-2 block animate-bounce"></i>
-                        이미지를 업로드하면 실시간 혼잡도 분석 리포트가 표시됩니다.
+                    <div id="txt-placeholder" class="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
+                        <i class="fa-solid fa-layer-group text-xl mb-2 block animate-pulse text-slate-300 dark:text-slate-700"></i>
+                        이미지를 업로드하면 차량 혼잡도 분석 보고서가 표시됩니다.
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800">
+    <footer class="bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 text-xs py-6 border-t border-slate-200 dark:border-slate-800/50 transition">
         <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-2">
-            <p>&copy; 2026 CrowdEye AI. Project for School Congestion Analysis.</p>
-            <p class="text-slate-500">Powered by TensorFlow.js & Teachable Machine</p>
+            <p>&copy; 2026 TrafficEye AI. All Rights Reserved.</p>
+            <p>Powered by TensorFlow.js & Teachable Machine</p>
         </div>
     </footer>
 
     <script>
+        const i18n = {
+            ko: {
+                modelLoading: "AI 분석 엔진 가동 준비 중...",
+                modelReady: "차량 데이터 분석 준비 완료",
+                modelError: "AI 모델 로드 오류가 발생했습니다.",
+                uploadTitle: "분석할 차량 이미지를 등록하세요",
+                uploadDesc: "클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그",
+                placeholder: "이미지를 업로드하면 차량 혼잡도 분석 보고서가 표시됩니다.",
+                titleStatus: "시스템 상태",
+                descStatus: "차량 혼잡도 측정 전용 AI 모델이 시스템에 내장되어 있습니다. 이미지를 올리면 별도의 연결 과정 없이 즉각 분석을 수행합니다.",
+                titleGuide: "데이터 분석 기준",
+                guideHigh: "많음:", guideHighDesc: " 도로 내에 차량이 정체되거나 밀집도가 포화 상태인 경우",
+                guideMid: "보통:", guideMidDesc: " 차량 흐름이 서행 상태이거나 일정 수준 유입된 경우",
+                guideLow: "적음:", guideLowDesc: " 소통이 원활하고 도로의 잔여 공간이 여유로운 경우",
+                titleResult: "실시간 분석 결과",
+                btnChange: "변경",
+                noModelMsg: "시스템 코어 엔진이 아직 준비되지 않았습니다."
+            },
+            en: {
+                modelLoading: "Initializing AI Analysis Engine...",
+                modelReady: "Traffic Model Ready for Analysis",
+                modelError: "Failed to load AI core model.",
+                uploadTitle: "Register Vehicle Image to Analyze",
+                uploadDesc: "Click to take photo/select gallery or drag file here",
+                placeholder: "Upload an image to display the traffic congestion report.",
+                titleStatus: "System Status",
+                descStatus: "A dedicated AI model for traffic congestion is embedded. Upload an image to analyze immediately without further setup.",
+                titleGuide: "Analysis Standards",
+                guideHigh: "Heavy:", guideHighDesc: " Traffic is gridlocked or density is saturated.",
+                guideMid: "Moderate:", guideMidDesc: " Traffic is moving slowly or partially congested.",
+                guideLow: "Light:", guideLowDesc: " Smooth flow with plenty of residual road space.",
+                titleResult: "Real-time Analysis Result",
+                btnChange: "Change",
+                noModelMsg: "System core engine is not ready yet."
+            },
+            ja: {
+                modelLoading: "AI分析エンジン起動準備中...",
+                modelReady: "車両データ分析準備完了",
+                modelError: "AIモデルのロードに失敗しました。",
+                uploadTitle: "分析する車両画像を登録してください",
+                uploadDesc: "クリックして撮影/ギャラリー選択またはファイルをドラッグ",
+                placeholder: "画像をアップロードすると、車両混雑度分析レポートが表示されます。",
+                titleStatus: "システム状態",
+                descStatus: "車両混잡度測定専用のAIモデルが内蔵されています。画像をアップロードするだけで即座に分析が実行されます。",
+                titleGuide: "データ分析基準",
+                guideHigh: "多い:", guideHighDesc: " 道路内で車両が渋滞しているか、密度が飽和状態の場合",
+                guideMid: "普通:", guideMidDesc: " 車の流れが徐行状態、または一定水準流入している場合",
+                guideLow: "少ない:", guideLowDesc: " スムーズに流れており、道路の残りの空間に余裕がある場合",
+                titleResult: "リアルタイム分析結果",
+                btnChange: "変更",
+                noModelMsg: "システムコアエンジンがまだ準備できていません。"
+            },
+            zh: {
+                modelLoading: "AI分析引擎正在初始化...",
+                modelReady: "车辆数据分析准备就绪",
+                modelError: "AI模型加载失败。",
+                uploadTitle: "请上传要分析的车辆图片",
+                uploadDesc: "点击拍照/选择相册或将文件拖拽至此",
+                placeholder: "上传图片后将在此显示车辆拥堵度分析报告。",
+                titleStatus: "系统状态",
+                descStatus: "系统已内置车辆拥堵度测量专用AI模型。只需上传图片即可立即进行分析，无需额外设置。",
+                titleGuide: "数据分析标准",
+                guideHigh: "拥堵:", guideHighDesc: " 道路内车辆停滞或密度达到饱和状态。",
+                guideMid: "缓行:", guideMidDesc: " 车流缓慢或有一定程度的车辆汇入。",
+                guideLow: "畅通:", guideLowDesc: " 交通顺畅，道路留有充裕空间。",
+                titleResult: "实时分析结果",
+                btnChange: "更改",
+                noModelMsg: "系统核心引擎尚未就绪。"
+            },
+            es: {
+                modelLoading: "Iniciando el motor de análisis IA...",
+                modelReady: "Modelo de tráfico listo para análisis",
+                modelError: "Error al cargar el modelo de IA.",
+                uploadTitle: "Registre la imagen del vehículo para analizar",
+                uploadDesc: "Haga clic para tomar foto/seleccionar galería o arrastre el archivo",
+                placeholder: "Suba una imagen para mostrar el informe de congestión de tráfico.",
+                titleStatus: "Estado del Sistema",
+                descStatus: "El modelo de IA dedicado a la congestión vehicular está integrado. Suba una imagen para analizar de inmediato.",
+                titleGuide: "Estándares de Análisis",
+                guideHigh: "Alto:", guideHighDesc: " El tráfico está atascado o la densidad está saturada.",
+                guideMid: "Moderado:", guideMidDesc: " El tráfico se mueve lentamente o está parcialmente congestionado.",
+                guideLow: "Bajo:", guideLowDesc: " Flujo fluido con bastante espacio residual en la carretera.",
+                titleResult: "Resultado del Análisis en Tiempo Real",
+                btnChange: "Cambiar",
+                noModelMsg: "El motor central del sistema aún no está listo."
+            }
+        };
+
+        let currentLangCode = 'ko';
+    </script>
+
+    <script>
+        // [필독] 사전에 학습을 완료한 티처블 머신 공유 모델 URL을 이곳에 고정해주세요.
+        // 폴더 내부의 경로 파일 구조라면 "./model/" 형태로 변경도 가능합니다.
+        const MODEL_URL = "https://teachablemachine.withgoogle.com/models/tm-my-image-model/"; 
+
         let model, maxPredictions;
         let isModelLoaded = false;
 
-        // 드래그 앤 드롭 이벤트 등록
+        // 드래그 앤 드롭 바인딩
         const dropZone = document.getElementById('drop-zone');
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('bg-indigo-50/50', 'border-indigo-400'); }, false);
+            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.add('bg-indigo-50/40', 'border-indigo-400', 'dark:bg-indigo-950/20'); }, false);
         });
         ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('bg-indigo-50/50', 'border-indigo-400'); }, false);
+            dropZone.addEventListener(eventName, (e) => { e.preventDefault(); dropZone.classList.remove('bg-indigo-50/40', 'border-indigo-400', 'dark:bg-indigo-950/20'); }, false);
         });
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
-            const files = dt.files;
-            if(files.length > 0) {
+            if(dt.files.length > 0) {
                 const selector = document.getElementById('image-selector');
-                selector.files = files;
+                selector.files = dt.files;
                 previewAndPredict(selector);
             }
         });
@@ -132,42 +256,27 @@
             document.getElementById('image-selector').click();
         }
 
-        // 1. 모델 동적 로드 함수
-        async function loadModel() {
-            const urlInput = document.getElementById("model-url-input").value.trim();
+        // 페이지 진입 시 사전에 정해진 티처블 머신 모델 즉시 자동 결합
+        async function autoInitModel() {
             const statusDiv = document.getElementById("model-status");
-            
-            if (!urlInput) {
-                alert("티처블 머신 모델 URL 주소를 입력해주세요!");
-                return;
-            }
-
-            const modelURL = urlInput.endsWith('/') ? urlInput + "model.json" : urlInput + "/model.json";
-            const metadataURL = urlInput.endsWith('/') ? urlInput + "metadata.json" : urlInput + "/metadata.json";
-
-            statusDiv.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> 모델 가중치 분석 및 로딩 중...`;
-            statusDiv.className = "mt-4 flex items-center gap-2 text-xs text-indigo-600 bg-indigo-50 px-3 py-2.5 rounded-lg font-medium border border-indigo-100";
-
             try {
+                const modelURL = MODEL_URL.endsWith('/') ? MODEL_URL + "model.json" : MODEL_URL + "/model.json";
+                const metadataURL = MODEL_URL.endsWith('/') ? MODEL_URL + "metadata.json" : MODEL_URL + "/metadata.json";
+
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
                 isModelLoaded = true;
 
-                statusDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> 모델이 성공적으로 연결되었습니다!`;
-                statusDiv.className = "mt-4 flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 px-3 py-2.5 rounded-lg font-medium border border-emerald-100";
-                
-                if(document.getElementById('image-preview').classList.contains('block')) {
-                    predict();
-                }
+                statusDiv.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i> <span id="txt-model-loading">${i18n[currentLangCode].modelReady}</span>`;
+                statusDiv.className = "flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30 px-3 py-3 rounded-xl font-semibold border border-emerald-100/70 dark:border-emerald-900/40";
             } catch (e) {
-                console.error(e);
-                statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 로드 실패. URL을 다시 확인해주세요.`;
-                statusDiv.className = "mt-4 flex items-center gap-2 text-xs text-rose-600 bg-rose-50 px-3 py-2.5 rounded-lg font-medium border border-rose-100";
-                isModelLoaded = false;
+                console.error("Core model integration error:", e);
+                statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span>${i18n[currentLangCode].modelError}</span>`;
+                statusDiv.className = "flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30 px-3 py-3 rounded-xl font-semibold border border-rose-100/70 dark:border-rose-900/40";
             }
         }
 
-        // 2. [버그 수정 완료] 이미지 업로드 시 미리보기 기능 최적화
+        // 이미지 미리보기 및 렌더링 검사 후 즉시 판단
         function previewAndPredict(input) {
             const file = input.files[0];
             if (file) {
@@ -175,7 +284,6 @@
                 reader.onload = function(e) {
                     const imgPreview = document.getElementById('image-preview');
                     
-                    // 비동기 렌더링 지연으로 인한 이미지 공백 버그 방지 (onload 핸들러 추가 후 경로 할당)
                     imgPreview.onload = function() {
                         imgPreview.classList.remove('hidden');
                         imgPreview.classList.add('block');
@@ -185,32 +293,22 @@
                         if (isModelLoaded) {
                             predict();
                         } else {
-                            initEmptyLabelLayout();
+                            document.getElementById("label-container").innerHTML = `
+                                <div class="text-center py-4 text-amber-600 dark:text-amber-400 text-xs font-semibold bg-amber-50/60 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/40">
+                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> ${i18n[currentLangCode].noModelMsg}
+                                </div>`;
                         }
                     };
-                    
                     imgPreview.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        // 3. 미등록 상태 가이드 라인
-        function initEmptyLabelLayout() {
-            const labelContainer = document.getElementById("label-container");
-            labelContainer.innerHTML = `
-                <div class="text-center py-4 text-amber-600 text-xs font-medium bg-amber-50 rounded-xl border border-amber-100">
-                    <i class="fa-solid fa-triangle-exclamation animate-pulse mr-1"></i> 왼쪽 패널에서 모델을 먼저 등록하면 분석 결과가 도출됩니다.
-                </div>`;
-        }
-
-        // 4. 핵심 분석 알고리즘 (많음, 보통, 적음 추출)
+        // 이미지 분석 추론 함수
         async function predict() {
             if (!isModelLoaded) return;
-            
             const image = document.getElementById("image-preview");
-            
-            // 이미지 엘리먼트가 정상적으로 완전히 메모리에 로드된 상태에서만 분석 처리 실행
             if (!image.complete || image.naturalWidth === 0) {
                 setTimeout(predict, 100);
                 return;
@@ -231,19 +329,19 @@
                 else if (className === "보통") colorClass = "bg-amber-400";
                 else if (className === "적음") colorClass = "bg-emerald-500";
 
-                const isHighest = prediction[i].className === highestPredict.className && highestPredict.probability > 0.1;
-                const activeStyle = isHighest ? 'border-indigo-200 bg-indigo-50/20 shadow-sm scale-[1.01]' : 'border-slate-100';
+                const isHighest = className === highestPredict.className && highestPredict.probability > 0.1;
+                const activeStyle = isHighest ? 'border-indigo-200 dark:border-indigo-500/40 bg-indigo-50/30 dark:bg-indigo-950/20 shadow-sm scale-[1.01]' : 'border-slate-100 dark:border-slate-800/60';
 
                 const labelRow = `
                     <div class="p-3 border rounded-xl transition duration-300 ${activeStyle}">
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="font-semibold text-sm text-slate-800 flex items-center gap-2">
+                            <span class="font-semibold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full ${colorClass}"></span>
                                 ${className}
                             </span>
-                            <span class="text-xs font-bold ${isHighest ? 'text-indigo-600 text-sm' : 'text-slate-500'}">${probability}%</span>
+                            <span class="text-xs font-bold ${isHighest ? 'text-indigo-600 dark:text-indigo-400 text-sm' : 'text-slate-500 dark:text-slate-400'}">${probability}%</span>
                         </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                             <div class="progress-bar ${colorClass} h-full rounded-full" style="width: ${probability}%"></div>
                         </div>
                     </div>
@@ -252,11 +350,10 @@
             }
         }
 
-        // 5. 이미지 리셋
         function resetImage() {
             document.getElementById('image-selector').value = "";
             const imgPreview = document.getElementById('image-preview');
-            imgPreview.src = "#";
+            imgPreview.removeAttribute('src');
             imgPreview.classList.remove('block');
             imgPreview.classList.add('hidden');
             
@@ -265,11 +362,86 @@
             
             const labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = `
-                <div class="text-center py-6 text-slate-400 text-sm">
-                    <i class="fa-solid fa-robot text-lg mb-2 block"></i>
-                    이미지를 업로드하면 실시간 혼잡도 분석 리포트가 표시됩니다.
+                <div id="txt-placeholder" class="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
+                    <i class="fa-solid fa-layer-group text-xl mb-2 block text-slate-300 dark:text-slate-700"></i>
+                    ${i18n[currentLangCode].placeholder}
                 </div>`;
         }
+
+        // 🌗 테마 전환 컨트롤 로직
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // 🌐 다국어 드롭다운 토글 및 언어 선택 로직
+        function toggleLangDropdown() {
+            document.getElementById('lang-dropdown').classList.toggle('show');
+        }
+
+        function selectLanguage(langCode, langName) {
+            currentLangCode = langCode;
+            document.getElementById('current-lang').innerText = langName;
+            document.getElementById('lang-dropdown').classList.remove('show');
+            
+            // UI 문자열 번역 치환 적용
+            const data = i18n[langCode];
+            
+            if (!isModelLoaded) {
+                document.getElementById('txt-model-loading').innerText = data.modelLoading;
+            } else {
+                document.getElementById('txt-model-loading').innerText = data.modelReady;
+            }
+            
+            document.getElementById('title-status').innerHTML = `<i class="fa-solid fa-circle-nodes text-indigo-500"></i> ${data.titleStatus}`;
+            document.getElementById('desc-status').innerText = data.descStatus;
+            document.getElementById('title-guide').innerHTML = `<i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> ${data.titleGuide}`;
+            
+            document.getElementById('guide-high').innerText = data.guideHigh;
+            document.getElementById('guide-high').nextSibling.textContent = data.guideHighDesc;
+            document.getElementById('guide-mid').innerText = data.guideMid;
+            document.getElementById('guide-mid').nextSibling.textContent = data.guideMidDesc;
+            document.getElementById('guide-low').innerText = data.guideLow;
+            document.getElementById('guide-low').nextSibling.textContent = data.guideLowDesc;
+            
+            document.getElementById('txt-upload-title').innerText = data.uploadTitle;
+            document.getElementById('txt-upload-desc').innerText = data.uploadDesc;
+            document.getElementById('title-result').innerHTML = `<i class="fa-solid fa-square-poll-vertical text-indigo-500"></i> ${data.titleResult}`;
+            document.getElementById('txt-btn-change').innerText = data.btnChange;
+            
+            const placeholder = document.getElementById('txt-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<i class="fa-solid fa-layer-group text-xl mb-2 block text-slate-300 dark:text-slate-700"></i> ${data.placeholder}`;
+            }
+            
+            if(document.getElementById('image-preview').classList.contains('block') && isModelLoaded) {
+                predict();
+            }
+        }
+
+        // 화면 바깥 클릭 시 드롭다운 닫기 외부 바인딩
+        window.addEventListener('click', function(e) {
+            if (!document.getElementById('lang-btn').contains(e.target)) {
+                document.getElementById('lang-dropdown').classList.remove('show');
+            }
+        });
+
+        // 시스템 초기화 가동
+        window.addEventListener('DOMContentLoaded', () => {
+            // 시스템 기본 시스템 테마 감지 적용
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            autoInitModel();
+        });
     </script>
 </body>
 </html>
