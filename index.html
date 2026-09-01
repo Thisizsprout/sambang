@@ -1,474 +1,286 @@
 <!DOCTYPE html>
-<html lang="ko" class="light">
+<html lang="ko" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrafficEye AI - 차량 혼잡도 분석</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>AI Vision Analytics | Teachable Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.7.4/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.4-alpha2/dist/teachablemachine-image.min.js"></script>
-
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { 
-            font-family: 'Pretendard', sans-serif; 
+        body {
+            font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes bounceIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .progress-bar { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .dropdown-menu {
-            opacity: 0;
-            transform: translateY(-8px) scale(0.95);
-            pointer-events: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        .futuristic-font {
+            font-family: 'Orbitron', sans-serif;
         }
-        .dropdown-menu.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            pointer-events: auto;
+        /* Custom Glowing Effect */
+        .glow-box {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        }
+        .dark .glow-box {
+            box-shadow: 0 0 35px rgba(16, 185, 129, 0.25);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-indigo-50/40 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
 
-    <header class="bg-white/80 dark:bg-slate-900/80 border-b border-indigo-100 dark:border-indigo-950/60 sticky top-0 z-50 backdrop-blur-md transition">
-        <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3 group cursor-pointer">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-none group-hover:rotate-12 transition duration-300">
-                    <i class="fa-solid fa-car-side text-base"></i>
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center glow-box">
+                    <i class="fa-solid fa-brain text-slate-950 text-lg"></i>
                 </div>
-                <div class="flex flex-col">
-                    <span class="font-extrabold text-base tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent">TrafficEye AI</span>
-                    <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase">School Project</span>
+                <div>
+                    <span class="futuristic-font text-xl font-black tracking-wider bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">NEO-VISION</span>
+                    <span class="block text-xs text-slate-400 tracking-widest font-mono" data-i18n="subtitle">AI REAL-TIME ENGINE</span>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-3">
+
+            <div class="flex items-center space-x-4">
                 <div class="relative">
-                    <button onclick="toggleLangDropdown(event)" id="lang-btn" class="flex items-center gap-2 text-xs font-bold px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer shadow-sm">
-                        <i class="fa-solid fa-globe text-indigo-500"></i>
-                        <span id="current-lang">한국어</span>
-                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
-                    </button>
-                    <div id="lang-dropdown" class="dropdown-menu absolute right-0 mt-2 w-32 bg-white dark:bg-slate-800 border border-indigo-50 dark:border-slate-700 rounded-2xl shadow-xl py-2 z-50 overflow-hidden">
-                        <button onclick="selectLanguage('ko', '한국어')" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">한국어</button>
-                        <button onclick="selectLanguage('en', 'English')" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">English</button>
-                        <button onclick="selectLanguage('ja', '日本語')" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">日本語</button>
-                        <button onclick="selectLanguage('zh', '中文')" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">中文</button>
-                        <button onclick="selectLanguage('es', 'Español')" class="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">Español</button>
-                    </div>
+                    <select id="langSelect" class="bg-slate-800/80 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-3 py-2 outline-none cursor-pointer transition">
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="en">🇺🇸 English</option>
+                    </select>
                 </div>
 
-                <button onclick="toggleTheme()" class="w-9 h-9 rounded-2xl bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95 cursor-pointer shadow-sm" id="theme-btn">
-                    <i class="fa-solid fa-moon text-indigo-500 dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                <button id="themeToggle" class="w-10 h-10 rounded-lg bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition">
+                    <i id="themeIcon" class="fa-solid fa-sun text-sm"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-5xl w-full mx-auto px-6 py-8 flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 bounce-in">
-        <div class="md:col-span-1 flex flex-col gap-6">
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-400 to-purple-400"></div>
-                <h2 id="title-status" class="text-base font-extrabold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-nodes text-indigo-500"></i> 시스템 상태
-                </h2>
-                <p id="desc-status" class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                    내장된 AI 압축 해제 모델을 불러옵니다. 같은 폴더 내의 가중치 정보를 기반으로 실시간 추론 연산을 즉시 실행합니다.
-                </p>
-                <div id="model-status" class="flex items-center gap-2.5 text-xs text-indigo-600 dark:text-indigo-300 bg-indigo-50/50 dark:bg-indigo-950/30 px-3.5 py-3 rounded-2xl font-bold border border-indigo-100/60 dark:border-indigo-900/40">
-                    <i class="fa-solid fa-circle-notch animate-spin text-indigo-500"></i> <span id="txt-model-loading">AI 분석 엔진 가동 준비 중...</span>
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+        
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 glow-box relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="futuristic-font text-lg font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-video text-emerald-400"></i>
+                        <span data-i18n="feedTitle">LIVE VISION FEED</span>
+                    </h2>
+                    <button id="startBtn" onclick="init()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center space-x-2 transform active:scale-95">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span data-i18n="startBtn">시스템 활성화</span>
+                    </button>
                 </div>
-            </div>
 
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm hidden md:block">
-                <h3 id="title-guide" class="text-sm font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-graduationcap text-purple-500"></i> 데이터 분석 기준
-                </h3>
-                <ul class="text-xs text-slate-500 dark:text-slate-400 space-y-3.5 leading-relaxed">
-                    <li class="flex gap-3 bg-rose-50/40 dark:bg-rose-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 mt-1 shrink-0"></span>
-                        <span><strong id="guide-high" class="text-slate-800 dark:text-slate-200">많음:</strong> 도로 내에 차량이 정체되거나 밀집도가 포화 상태인 경우</span>
-                    </li>
-                    <li class="flex gap-3 bg-amber-50/40 dark:bg-amber-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 mt-1 shrink-0"></span>
-                        <span><strong id="guide-mid" class="text-slate-800 dark:text-slate-200">보통:</strong> 차량 흐름이 서행 상태이거나 일정 수준 유입된 경우</span>
-                    </li>
-                    <li class="flex gap-3 bg-emerald-50/40 dark:bg-emerald-950/10 p-2 rounded-xl">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mt-1 shrink-0"></span>
-                        <span><strong id="guide-low" class="text-slate-800 dark:text-slate-200">적음:</strong> 소통이 원활하고 도로의 잔여 공간이 여유로운 경우</span>
-                    </li>
-                </ul>
+                <div class="relative aspect-video w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                    <div id="webcam-container" class="w-full h-full flex items-center justify-center">
+                        <div id="placeholderText" class="text-center p-6 text-slate-500 flex flex-col items-center space-y-3">
+                            <i class="fa-solid fa-camera-retro text-4xl animate-pulse text-emerald-500/50"></i>
+                            <p class="text-sm" data-i18n="placeholder">활성화 버튼을 눌러 카메라 스트림을 시작하세요.</p>
+                        </div>
+                    </div>
+                    <div id="statusBadge" class="absolute top-4 left-4 bg-slate-950/70 backdrop-blur border border-slate-800 px-3 py-1 rounded-full text-xs font-mono text-slate-400 flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-rose-500" id="statusDot"></span>
+                        <span id="statusText" data-i18n="statusStandby">STANDBY</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="md:col-span-2 flex flex-col gap-6">
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm flex flex-col items-center justify-center min-h-[340px] relative overflow-hidden group">
-                <div id="drop-zone" class="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 dark:border-slate-700 rounded-2xl p-8 hover:bg-gradient-to-br hover:from-indigo-50/30 hover:to-purple-50/30 dark:hover:from-indigo-950/10 dark:hover:to-slate-900 hover:border-indigo-400 transition duration-300 cursor-pointer relative" onclick="triggerFileInput()">
-                    <input type="file" id="image-selector" accept="image/*" class="hidden" onchange="previewAndPredict(this)">
-                    <div class="w-16 h-16 bg-indigo-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-indigo-500 dark:text-indigo-400 group-hover:scale-110 group-hover:rotate-6 transition duration-300 mb-4 shadow-inner">
-                        <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
-                    </div>
-                    <p id="txt-upload-title" class="text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-1 text-center">분석할 차량 이미지를 등록하세요</p>
-                    <p id="txt-upload-desc" class="text-xs text-slate-400 dark:text-slate-500 text-center px-4">클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그</p>
-                </div>
+        <div class="lg:col-span-5 flex flex-col space-y-6">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 glow-box">
+                <h2 class="futuristic-font text-lg font-bold flex items-center space-x-2 mb-6">
+                    <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                    <span data-i18n="analyticsTitle">REAL-TIME ANALYTICS</span>
+                </h2>
 
-                <img id="image-preview" src="#" alt="미리보기" class="hidden max-h-80 w-full object-contain rounded-2xl border border-slate-100 dark:border-slate-800 shadow-md">
-                <button id="btn-reset" onclick="resetImage()" class="hidden absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-900 text-white dark:bg-slate-800/90 dark:hover:bg-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition active:scale-95 cursor-pointer backdrop-blur-sm">
-                    <i class="fa-solid fa-arrow-rotate-left mr-1"></i> <span id="txt-btn-change">변경</span>
-                </button>
+                <div id="label-container" class="space-y-4">
+                    <div class="text-slate-500 text-sm text-center py-8" data-i18n="waitingModel">
+                        모델이 로드되면 분석 결과가 여기에 실시간으로 시각화됩니다.
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-100/70 dark:border-indigo-950/50 shadow-sm">
-                <h2 id="title-result" class="text-base font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-simple text-purple-500"></i> 실시간 분석 결과
-                </h2>
-                <div id="label-container" class="space-y-4">
-                    <div id="txt-placeholder" class="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
-                        <i class="fa-solid fa-wand-magic-sparkles text-xl mb-2.5 block text-indigo-300 dark:text-indigo-800 animate-pulse"></i>
-                        <span id="txt-placeholder-text">이미지를 업로드하면 차량 혼잡도 분석 보고서가 표시됩니다.</span>
-                    </div>
-                </div>
+            <div class="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 text-xs text-slate-400 flex items-center justify-between font-mono">
+                <span>MODEL: TM-IMAGE-MODEL</span>
+                <span class="text-emerald-400">TFJS v1.7.4</span>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 text-[11px] py-6 border-t border-indigo-50 dark:border-indigo-950/50 transition">
-        <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-2">
-            <p class="font-medium">&copy; 2026 TrafficEye AI. All Rights Reserved.</p>
-            <p class="text-indigo-400/80 dark:text-indigo-600/80">Built with TensorFlow.js for High School AI Research</p>
-        </div>
+    <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 font-mono">
+        <p>&copy; 2026 NEO-VISION AI ANALYTICS. All Rights Reserved.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
     <script>
-        const i18n = {
+        // 다국어 텍스트 정의
+        const translations = {
             ko: {
-                modelLoading: "AI 분석 엔진 가동 준비 중...",
-                modelReady: "차량 데이터 분석 준비 완료",
-                modelError: "깃허브 내 모델 파일 파일 구조를 확인해주세요.",
-                uploadTitle: "분석할 차량 이미지를 등록하세요",
-                uploadDesc: "클릭하여 사진 촬영/갤러리 선택 또는 파일 드래그",
-                placeholder: "이미지를 업로드하면 차량 혼잡도 분석 보고서가 표시됩니다.",
-                titleStatus: "시스템 상태",
-                descStatus: "내장된 AI 압축 해제 모델을 불러옵니다. 같은 폴더 내의 가중치 정보를 기반으로 실시간 추론 연산을 즉시 실행합니다.",
-                titleGuide: "데이터 분석 기준",
-                guideHigh: "많음:", guideHighDesc: " 도로 내에 차량이 정체되거나 밀집도가 포화 상태인 경우",
-                guideMid: "보통:", guideMidDesc: " 차량 흐름이 서행 상태이거나 일정 수준 유입된 경우",
-                guideLow: "적음:", guideLowDesc: " 소통이 원활하고 도로의 잔여 공간이 여유로운 경우",
-                titleResult: "실시간 분석 결과",
-                btnChange: "변경",
-                noModelMsg: "시스템 코어 인공지능이 아직 활성화되지 않았습니다.",
-                labelHigh: "많음", labelMid: "보통", labelLow: "적음"
+                subtitle: "AI 실시간 비전 엔진",
+                feedTitle: "실시간 비전 피드",
+                startBtn: "시스템 활성화",
+                placeholder: "활성화 버튼을 눌러 카메라 스트림을 시작하세요.",
+                statusStandby: "대기 중",
+                statusActive: "가동 중",
+                analyticsTitle: "실시간 확률 분석",
+                waitingModel: "모델이 로드되면 분석 결과가 여기에 실시간으로 시각화됩니다."
             },
             en: {
-                modelLoading: "Initializing AI Analysis Engine...",
-                modelReady: "Traffic Model Ready for Analysis",
-                modelError: "Please check the model files structure in GitHub.",
-                uploadTitle: "Register Vehicle Image to Analyze",
-                uploadDesc: "Click to take photo/select gallery or drag file here",
-                placeholder: "Upload an image to display the traffic congestion report.",
-                titleStatus: "System Status",
-                descStatus: "Loads the built-in AI unzipped model. Runs real-time inference computation based on weight info in the same folder.",
-                titleGuide: "Analysis Standards",
-                guideHigh: "Heavy:", guideHighDesc: " Traffic is gridlocked or density is saturated.",
-                guideMid: "Moderate:", guideMidDesc: " Traffic is moving slowly or partially congested.",
-                guideLow: "Light:", guideLowDesc: " Smooth flow with plenty of residual road space.",
-                titleResult: "Real-time Analysis Result",
-                btnChange: "Change",
-                noModelMsg: "System core AI is not activated yet.",
-                labelHigh: "Heavy", labelMid: "Moderate", labelLow: "Light"
-            },
-            ja: {
-                modelLoading: "AI分析エンジン起動準備中...",
-                modelReady: "車両データ分析準備完了",
-                modelError: "GitHub内のモデルファイル構造を確認してください。",
-                uploadTitle: "分析する車両画像を登録してください",
-                uploadDesc: "クリックして撮影/ギャラリー選択 또는 파일을 드래그",
-                placeholder: "画像をアップロードすると、車両混雑度分析レポートが表示されます。",
-                titleStatus: "システム状態",
-                descStatus: "内蔵されたAI解凍モデルを読み込みます。同じフォルダ内の重み情報に基づいてリアルタイム推論を即座に実行します。",
-                titleGuide: "データ分析基準",
-                guideHigh: "多い:", guideHighDesc: " 道路内で車両が渋滞しているか、密度が飽和状態の場合",
-                guideMid: "普通:", guideMidDesc: " 車の流れが徐行状態、または一定水準流入している場合",
-                guideLow: "少ない:", guideLowDesc: " スムーズに流れており、道路の残りの空間に余裕がある場合",
-                titleResult: "リアルタイム分析結果",
-                btnChange: "変更",
-                noModelMsg: "システムコアAIがまだアクティブになっていません。",
-                labelHigh: "多い", labelMid: "普通", labelLow: "少ない"
-            },
-            zh: {
-                modelLoading: "AI分析引擎正在初始化...",
-                modelReady: "车辆数据分析准备就绪",
-                modelError: "请检查GitHub中的模型文件结构。",
-                uploadTitle: "请上传要分析的车辆图片",
-                uploadDesc: "点击拍照/选择相册或将文件拖拽至此",
-                placeholder: "上传图片后将在此显示车辆拥堵度分析报告。",
-                titleStatus: "系统状态",
-                descStatus: "加载内置的AI解压模型。基于同文件夹下的权重信息，立即进行实时推理计算。",
-                titleGuide: "数据分析标准",
-                guideHigh: "拥堵:", guideHighDesc: " 道路内车辆停滞或密度达到饱和状态。",
-                guideMid: "缓行:", guideMidDesc: " 车流缓慢或有一定程度 of 车辆汇入。",
-                guideLow: "畅通:", guideLowDesc: " 交通顺畅，道路留有充裕空间。",
-                titleResult: "实时分析结果",
-                btnChange: "更改",
-                noModelMsg: "系统核心人工智能尚未激活。",
-                labelHigh: "拥堵", labelMid: "缓行", labelLow: "畅通"
-            },
-            es: {
-                modelLoading: "Iniciando el motor de análisis IA...",
-                modelReady: "Modelo de tráfico listo para análisis",
-                modelError: "Por favor, verifique la estructura de archivos en GitHub.",
-                uploadTitle: "Registre la imagen del vehículo para analizar",
-                uploadDesc: "Haga clic para tomar foto/seleccionar galería o arrastre el archivo",
-                placeholder: "Suba una imagen para mostrar el informe de congestión de tráfico.",
-                titleStatus: "Estado del Sistema",
-                descStatus: "Carga el modelo de IA descomprimido integrado. Ejecuta cálculos de inferencia en tiempo real basados en la información de pesos de la misma carpeta.",
-                titleGuide: "Estándares de Análisis",
-                guideHigh: "Alto:", guideHighDesc: " El tráfico está atascado o la densidad está saturada.",
-                guideMid: "Moderado:", guideMidDesc: " El tráfico se mueve lentamente o está parcialmente congestionado.",
-                guideLow: "Bajo:", guideLowDesc: " Flujo fluido con bastante espacio residual en la carretera.",
-                titleResult: "Resultado del Análisis en Tiempo Real",
-                btnChange: "Cambiar",
-                noModelMsg: "El núcleo de IA del sistema aún no está activado.",
-                labelHigh: "Alto", labelMid: "Moderado", labelLow: "Bajo"
+                subtitle: "AI REAL-TIME ENGINE",
+                feedTitle: "LIVE VISION FEED",
+                startBtn: "Initialize System",
+                placeholder: "Click the button above to start webcam stream.",
+                statusStandby: "STANDBY",
+                statusActive: "ACTIVE",
+                analyticsTitle: "REAL-TIME ANALYTICS",
+                waitingModel: "Analytics will appear here once the model is loaded."
             }
         };
-        let currentLangCode = 'ko';
-    </script>
 
-    <script>
-        // ✨ [핵심 수정] 깃허브 페이지스 환경에 맞춘 유연한 절대 경로 자동 추출
-        const getBaseUrl = () => {
-            const loc = window.location;
-            // 깃허브 주소 끝부분의 index.html을 잘라내어 베이스 경로 확보
-            return loc.protocol + '//' + loc.host + loc.pathname.substring(0, loc.pathname.lastIndexOf('/')) + '/';
-        };
+        let currentLang = 'ko';
 
-        const MODEL_URL = getBaseUrl(); 
-        let model, maxPredictions;
-        let isModelLoaded = false;
-        let lastPredictionsData = null;
-
-        const dropZone = document.getElementById('drop-zone');
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { 
-                e.preventDefault(); 
-                dropZone.classList.add('bg-indigo-50/50', 'border-indigo-400', 'dark:bg-indigo-950/20'); 
-            }, false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => { 
-                e.preventDefault(); 
-                dropZone.classList.remove('bg-indigo-50/50', 'border-indigo-400', 'dark:bg-indigo-950/20'); 
-            }, false);
-        });
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            if(dt.files.length > 0) {
-                const selector = document.getElementById('image-selector');
-                selector.files = dt.files;
-                previewAndPredict(selector);
-            }
+        // 언어 변경 처리
+        document.getElementById('langSelect').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            updateTexts();
         });
 
-        function triggerFileInput() {
-            document.getElementById('image-selector').click();
-        }
-
-        async function autoInitModel() {
-            const statusDiv = document.getElementById("model-status");
-            try {
-                // ⚙️ 깃허브 배포 환경을 고려한 명시적 대소문자 고정 및 주소 주입
-                model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
-                maxPredictions = model.getTotalClasses();
-                isModelLoaded = true;
-
-                statusDiv.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 animate-bounce"></i> <span>${i18n[currentLangCode].modelReady}</span>`;
-                statusDiv.className = "flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/30 px-3.5 py-3 rounded-2xl font-bold border border-emerald-100/60 dark:border-emerald-900/40";
-            } catch (e) {
-                console.error("GitHub Core Model loading failed:", e);
-                statusDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> <span>${i18n[currentLangCode].modelError}</span>`;
-                statusDiv.className = "flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30 px-3.5 py-3 rounded-2xl font-bold border border-rose-100/60 dark:border-rose-900/40";
-            }
-        }
-
-        function previewAndPredict(input) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const imgPreview = document.getElementById('image-preview');
-                    imgPreview.onload = function() {
-                        imgPreview.classList.remove('hidden');
-                        imgPreview.classList.add('block');
-                        document.getElementById('drop-zone').classList.add('hidden');
-                        document.getElementById('btn-reset').classList.remove('hidden');
-                        
-                        if (isModelLoaded) {
-                            predict();
-                        } else {
-                            document.getElementById("label-container").innerHTML = `
-                                <div class="text-center py-4 text-amber-600 dark:text-amber-400 text-xs font-bold bg-amber-50/60 dark:bg-amber-950/20 rounded-2xl border border-amber-100 dark:border-amber-900/40">
-                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> ${i18n[currentLangCode].noModelMsg}
-                                </div>`;
-                        }
-                    };
-                    imgPreview.src = e.target.result;
+        function updateTexts() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
                 }
-                reader.readAsDataURL(file);
+            });
+        }
+
+        // 다크/라이트 모드 토글
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement;
+
+        themeToggleBtn.addEventListener('click', () => {
+            if (htmlElement.getAttribute('data-theme') === 'dark') {
+                htmlElement.setAttribute('data-theme', 'light');
+                themeIcon.className = 'fa-solid fa-moon text-sm';
+                // 라이트모드 스타일 세부조정 (선택사항)
+                document.body.classList.remove('bg-slate-950', 'text-slate-100');
+                document.body.classList.add('bg-slate-50', 'text-slate-900');
+            } else {
+                htmlElement.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fa-solid fa-sun text-sm';
+                document.body.classList.remove('bg-slate-50', 'text-slate-900');
+                document.body.classList.add('bg-slate-950', 'text-slate-100');
             }
+        });
+
+        // 티처블 머신 연동 로직
+        const URL = "./my_model/";
+        let model, webcam, labelContainer, maxPredictions;
+        let isInitialized = false;
+
+        async function init() {
+            if (isInitialized) return;
+            
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Loading...`;
+
+            try {
+                const modelURL = URL + "model.json";
+                const metadataURL = URL + "metadata.json";
+
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                const flip = true;
+                webcam = new tmImage.Webcam(400, 300, flip);
+                await webcam.setup();
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // 웹캠 캔버스 주입
+                const webcamContainer = document.getElementById("webcam-container");
+                webcamContainer.innerHTML = "";
+                webcamContainer.appendChild(webcam.canvas);
+
+                // 라벨 컨테이너 초기화
+                labelContainer = document.getElementById("label-container");
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "space-y-1.5";
+                    wrapper.innerHTML = `
+                        <div class="flex justify-between text-sm font-medium">
+                            <span id="label-name-${i}" class="font-mono text-slate-300">Class</span>
+                            <span id="label-prob-${i}" class="font-mono text-emerald-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden border border-slate-700/50">
+                            <div id="bar-${i}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full transition-all duration-100" style="width: 0%"></div>
+                        </div>
+                    `;
+                    labelContainer.appendChild(wrapper);
+                }
+
+                isInitialized = true;
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                document.getElementById('statusText').innerText = currentLang === 'ko' ? "가동 중" : "ACTIVE";
+                startBtn.style.display = 'none';
+
+            } catch (error) {
+                console.error("Model loading error:", error);
+                alert(currentLang === 'ko' ? "모델 로드 실패! my_model 폴더 경로 및 파일을 확인하세요." : "Failed to load model! Please check the my_model folder.");
+                startBtn.disabled = false;
+                startBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> ${translations[currentLang].startBtn}`;
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
         }
 
         async function predict() {
-            if (!isModelLoaded) return;
-            const image = document.getElementById("image-preview");
-            if (!image.complete || image.naturalWidth === 0) {
-                setTimeout(predict, 100);
-                return;
-            }
-
-            const prediction = await model.predict(image);
-            lastPredictionsData = prediction;
-            renderResults(prediction);
-        }
-
-        function renderResults(prediction) {
-            const labelContainer = document.getElementById("label-container");
-            labelContainer.innerHTML = ""; 
-
-            const highestPredict = [...prediction].sort((a,b) => b.probability - a.probability)[0];
-
+            const prediction = await model.predict(webcam.canvas);
             for (let i = 0; i < maxPredictions; i++) {
-                const originalName = prediction[i].className;
+                const className = prediction[i].className;
                 const probability = (prediction[i].probability * 100).toFixed(1);
-                
-                let translatedName = originalName;
-                if(originalName === "많음") translatedName = i18n[currentLangCode].labelHigh;
-                else if(originalName === "보통") translatedName = i18n[currentLangCode].labelMid;
-                else if(originalName === "적음") translatedName = i18n[currentLangCode].labelLow;
 
-                let colorClass = "bg-slate-400";
-                if (originalName === "많음") colorClass = "bg-gradient-to-r from-rose-500 to-pink-500";
-                else if (originalName === "보통") colorClass = "bg-gradient-to-r from-amber-400 to-orange-400";
-                else if (originalName === "적음") colorClass = "bg-gradient-to-r from-emerald-500 to-teal-500";
+                const nameEl = document.getElementById(`label-name-${i}`);
+                const probEl = document.getElementById(`label-prob-${i}`);
+                const barEl = document.getElementById(`bar-${i}`);
 
-                const isHighest = originalName === highestPredict.className && highestPredict.probability > 0.1;
-                const activeStyle = isHighest ? 'border-purple-300 dark:border-purple-500 bg-purple-50/40 dark:bg-purple-950/20 shadow-md scale-[1.02]' : 'border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900';
-
-                const labelRow = `
-                    <div class="p-3.5 border rounded-2xl transition duration-300 ${activeStyle}">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full ${colorClass} inline-block"></span>
-                                ${translatedName}
-                            </span>
-                            <span class="text-xs font-black ${isHighest ? 'text-purple-600 dark:text-purple-400 text-sm' : 'text-slate-400'}">${probability}%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                            <div class="progress-bar ${colorClass} h-full rounded-full" style="width: ${probability}%"></div>
-                        </div>
-                    </div>
-                `;
-                labelContainer.insertAdjacentHTML('beforeend', labelRow);
+                if (nameEl && probEl && barEl) {
+                    nameEl.innerText = className;
+                    probEl.innerText = `${probability}%`;
+                    barEl.style.width = `${probability}%`;
+                }
             }
         }
-
-        function resetImage() {
-            document.getElementById('image-selector').value = "";
-            const imgPreview = document.getElementById('image-preview');
-            imgPreview.removeAttribute('src');
-            imgPreview.classList.remove('block');
-            imgPreview.classList.add('hidden');
-            
-            document.getElementById('drop-zone').classList.remove('hidden');
-            document.getElementById('btn-reset').classList.add('hidden');
-            lastPredictionsData = null;
-            
-            const labelContainer = document.getElementById("label-container");
-            labelContainer.innerHTML = `
-                <div id="txt-placeholder" class="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles text-xl mb-2.5 block text-indigo-300 dark:text-indigo-800"></i>
-                    <span id="txt-placeholder-text">${i18n[currentLangCode].placeholder}</span>
-                </div>`;
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                html.classList.add('light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.classList.remove('light');
-                html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        function toggleLangDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('lang-dropdown').classList.toggle('show');
-        }
-
-        function selectLanguage(langCode, langName) {
-            currentLangCode = langCode;
-            document.getElementById('current-lang').innerText = langName;
-            document.getElementById('lang-dropdown').classList.remove('show');
-            updateUILanguage();
-        }
-
-        function updateUILanguage() {
-            const data = i18n[currentLangCode];
-            const statusTextSpan = document.getElementById('txt-model-loading');
-            if (statusTextSpan) {
-                statusTextSpan.innerText = isModelLoaded ? data.modelReady : data.modelLoading;
-            }
-            
-            document.getElementById('title-status').innerHTML = `<i class="fa-solid fa-circle-nodes text-indigo-500"></i> ${data.titleStatus}`;
-            document.getElementById('desc-status').innerText = data.descStatus;
-            document.getElementById('title-guide').innerHTML = `<i class="fa-solid fa-graduationcap text-purple-500"></i> ${data.titleGuide}`;
-            
-            document.getElementById('guide-high').innerText = data.guideHigh;
-            document.getElementById('guide-high').nextSibling.textContent = data.guideHighDesc;
-            document.getElementById('guide-mid').innerText = data.guideMid;
-            document.getElementById('guide-mid').nextSibling.textContent = data.guideMidDesc;
-            document.getElementById('guide-low').innerText = data.guideLow;
-            document.getElementById('guide-low').nextSibling.textContent = data.guideLowDesc;
-            
-            document.getElementById('txt-upload-title').innerText = data.uploadTitle;
-            document.getElementById('txt-upload-desc').innerText = data.uploadDesc;
-            document.getElementById('title-result').innerHTML = `<i class="fa-solid fa-chart-simple text-purple-500"></i> ${data.titleResult}`;
-            document.getElementById('txt-btn-change').innerText = data.btnChange;
-            
-            const placeholderText = document.getElementById('txt-placeholder-text');
-            if (placeholderText) {
-                placeholderText.innerText = data.placeholder;
-            }
-            
-            if (lastPredictionsData) {
-                renderResults(lastPredictionsData);
-            }
-        }
-
-        window.addEventListener('click', function() {
-            document.getElementById('lang-dropdown').classList.remove('show');
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-                document.documentElement.classList.remove('light');
-            } else {
-                document.documentElement.classList.add('light');
-                document.documentElement.classList.remove('dark');
-            }
-            autoInitModel();
-        });
     </script>
 </body>
 </html>
