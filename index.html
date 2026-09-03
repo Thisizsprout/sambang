@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>실시간 상태 모니터링 - FORCE UPDATE</title>
+    <title>실시간 상태 모니터링</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -34,13 +34,13 @@
         }
         
         :root {
-            --bg-main: #0F172A; /* 확실히 눈에 띄도록 현대적인 다크 네이비 톤으로 강제 변경하여 변경 여부 즉시 확인 */
-            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-main: #0F172A;
+            --bg-card: rgba(30, 41, 59, 0.75);
             --border-card: rgba(51, 65, 85, 0.8);
             --text-main: #F8FAFC;
             --text-sub: #94A3B8;
             --accent-warm: #38BDF8;
-            --accent-sub: rgba(15, 23, 42, 0.6);
+            --accent-sub: rgba(15, 23, 42, 0.5);
         }
         [data-theme="light"] {
             --bg-main: #F8FAFC;
@@ -52,18 +52,13 @@
             --accent-sub: rgba(241, 245, 249, 0.9);
         }
 
-        /* 아이폰 스타일 글래스모피즘 + 강렬한 반투명 효과 */
+        /* 글래스모피즘 (과도한 애니메이션 제거, 안정적인 스타일 고정) */
         .glass-card {
             background-color: var(--bg-card);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--border-card);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
 
         .glass-header {
@@ -72,31 +67,42 @@
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-card);
         }
+
+        /* 언어 선택 및 버튼 UI 스타일 통일 */
+        .ui-control-box {
+            background-color: var(--accent-sub);
+            border: 1px solid var(--border-card);
+            color: var(--text-main);
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .ui-control-box:hover {
+            border-color: var(--accent-warm);
+        }
     </style>
 </head>
-<body style="background-color: var(--bg-main); color: var(--text-main);" class="min-h-screen flex flex-col justify-between transition-colors duration-500">
+<body style="background-color: var(--bg-main); color: var(--text-main);" class="min-h-screen flex flex-col justify-between transition-colors duration-300">
 
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-header">
         <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/30 transition transform hover:scale-110">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
                     <i class="fa-solid fa-bolt text-lg"></i>
                 </div>
                 <div>
-                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링 (NEW)</span>
+                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링</span>
                     <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="headerSub">실시간 현황판</span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-3">
-                <!-- 4개국어 지원 드롭다운 UI -->
+                <!-- 통일된 UI 스타일이 적용된 4개국어 선택 드롭다운 -->
                 <div class="relative">
-                    <select id="langSelect" class="text-xs rounded-xl px-4 py-2.5 outline-none cursor-pointer transition font-medium appearance-none pr-9 shadow-sm" style="background-color: var(--accent-sub); border: 1px solid var(--border-card); color: var(--text-main);">
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="en">🇺🇸 English</option>
-                        <option value="ja">🇯🇵 日本語</option>
-                        <option value="zh">🇨🇳 中文</option>
+                    <select id="langSelect" class="ui-control-box text-xs rounded-xl px-4 py-2.5 outline-none cursor-pointer font-medium appearance-none pr-9 shadow-sm">
+                        <option value="ko" style="background: var(--bg-main); color: var(--text-main);">🇰🇷 한국어</option>
+                        <option value="en" style="background: var(--bg-main); color: var(--text-main);">🇺🇸 English</option>
+                        <option value="ja" style="background: var(--bg-main); color: var(--text-main);">🇯🇵 日本語</option>
+                        <option value="zh" style="background: var(--bg-main); color: var(--text-main);">🇨🇳 中文</option>
                     </select>
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">
                         <i class="fa-solid fa-chevron-down"></i>
@@ -104,7 +110,7 @@
                 </div>
 
                 <!-- 테마 토글 버튼 -->
-                <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm" style="background-color: var(--accent-sub); border-color: var(--border-card);">
+                <button id="themeToggle" class="ui-control-box w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer">
                     <i id="themeIcon" class="fa-solid fa-moon text-sky-400 text-sm"></i>
                 </button>
             </div>
@@ -123,8 +129,8 @@
                         <span data-i18n="feedTitle">실시간 카메라 영상</span>
                     </h2>
                     
-                    <!-- 카메라 ON/OFF 버튼 (애니메이션 탑재) -->
-                    <button id="camToggleBtn" onclick="toggleCamera()" class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-md shadow-sky-500/20 text-xs flex items-center space-x-2 transform hover:-translate-y-0.5 active:scale-95">
+                    <!-- 카메라 ON/OFF 버튼 (과도한 애니메이션 제거, 깔끔한 인터랙션) -->
+                    <button id="camToggleBtn" onclick="toggleCamera()" class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-md text-xs flex items-center space-x-2 active:scale-95 cursor-pointer">
                         <i id="camBtnIcon" class="fa-solid fa-play"></i>
                         <span id="camBtnText" data-i18n="startBtn">카메라 시작하기</span>
                     </button>
@@ -133,19 +139,19 @@
                 <div class="relative aspect-video w-full bg-black/20 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center shadow-inner">
                     <div id="webcam-container" class="w-full h-full flex items-center justify-center">
                         <div id="placeholderText" class="text-center p-6 opacity-50 flex flex-col items-center space-y-3">
-                            <i class="fa-solid fa-camera text-4xl text-sky-400 animate-bounce"></i>
+                            <i class="fa-solid fa-camera text-4xl text-sky-400"></i>
                             <p class="text-xs font-medium tracking-wide" data-i18n="placeholder">버튼을 눌러 카메라를 연결하세요.</p>
                         </div>
                     </div>
                     <div class="absolute top-4 left-4 backdrop-blur-md border px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center space-x-2 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-card);">
-                        <span class="w-2 h-2 rounded-full bg-amber-400 transition-colors duration-300" id="statusDot"></span>
+                        <span class="w-2 h-2 rounded-full bg-amber-400" id="statusDot"></span>
                         <span id="statusText" data-i18n="statusStandby">대기 중</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Status Display (수치 전면 제거, 오직 상태명만 출력) -->
+        <!-- Right: Status Display -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
             <div class="glass-card rounded-3xl p-6 flex flex-col items-center text-center">
                 <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 w-full justify-start tracking-wide">
@@ -154,11 +160,11 @@
                 </h2>
 
                 <div class="relative w-48 h-48 my-4 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-sky-400/30 animate-[spin_20s_linear_infinite]"></div>
-                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner transition-all duration-300" style="background-color: var(--accent-sub);">
+                    <!-- 회전 애니메이션 제거 및 정적인 고정 테두리로 변경 -->
+                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-sky-400/20"></div>
+                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner" style="background-color: var(--accent-sub);">
                         <span class="text-[11px] font-semibold uppercase opacity-60 mb-1 tracking-wider" data-i18n="currentState">현재 상태</span>
-                        <!-- 수치 없이 오직 상태명만 큼직하게 출력 -->
-                        <span id="coreMainClassName" class="modern-font text-2xl font-bold text-sky-400 truncate max-w-[150px] transition-all duration-300">-</span>
+                        <span id="coreMainClassName" class="modern-font text-2xl font-bold text-sky-400 truncate max-w-[150px]">-</span>
                     </div>
                 </div>
 
@@ -167,7 +173,7 @@
                 </div>
             </div>
 
-            <!-- 하단 상태 목록 칩 (수치 없음) -->
+            <!-- 하단 상태 목록 칩 -->
             <div id="label-container" class="glass-card rounded-2xl p-4 grid grid-cols-2 gap-3">
                 <div class="col-span-2 text-center py-4 text-xs opacity-50 font-medium" data-i18n="waitingModel">
                     모델 로딩 대기 중...
@@ -177,7 +183,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t py-6 text-center text-xs opacity-50 transition-colors" style="border-color: var(--border-card);">
+    <footer class="border-t py-6 text-center text-xs opacity-50" style="border-color: var(--border-card);">
         <p>&copy; 2026 AI MONITORING SYSTEM. ALL RIGHTS RESERVED.</p>
     </footer>
 
@@ -188,7 +194,7 @@
     <script>
         const translations = {
             ko: {
-                headerSub: "실시간 현황판 (NEW)",
+                headerSub: "실시간 현황판",
                 feedTitle: "실시간 카메라 영상",
                 startBtn: "카메라 시작하기",
                 stopBtn: "카메라 끄기",
@@ -201,7 +207,7 @@
                 waitingModel: "모델 로딩 대기 중..."
             },
             en: {
-                headerSub: "Live Dashboard (NEW)",
+                headerSub: "Live Dashboard",
                 feedTitle: "Live Camera Stream",
                 startBtn: "Start Camera",
                 stopBtn: "Stop Camera",
@@ -214,7 +220,7 @@
                 waitingModel: "Waiting for model..."
             },
             ja: {
-                headerSub: "リアルタイム状況盤 (NEW)",
+                headerSub: "リアルタイム状況盤",
                 feedTitle: "ライブカメラ映像",
                 startBtn: "カメラ開始",
                 stopBtn: "カメラ停止",
@@ -227,7 +233,7 @@
                 waitingModel: "モデルの読み込み待ち..."
             },
             zh: {
-                headerSub: "实时状态面板 (NEW)",
+                headerSub: "实时状态面板",
                 feedTitle: "实时相机画面",
                 startBtn: "开启相机",
                 stopBtn: "关闭相机",
@@ -309,9 +315,12 @@
                     isModelLoaded = true;
                 }
 
+                // 버그 수정: webcam 인스턴스가 존재하더라도 재시작 시 스트림이 끊기는 문제를 방지하기 위해 새로 생성하거나 재설정
                 if (!webcam) {
                     webcam = new tmImage.Webcam(420, 315, true);
                     await webcam.setup();
+                } else {
+                    await webcam.setup(); // 기존 인스턴스 초기화 보완
                 }
                 
                 await webcam.play();
@@ -332,7 +341,7 @@
 
             } catch (error) {
                 console.error("Camera error:", error);
-                alert("카메라를 연결하거나 모델을 불러오지 못했습니다.");
+                alert("카메라 권한을 확인하거나 모델을 불러오지 못했습니다.");
                 camToggleBtn.disabled = false;
                 camBtnIcon.className = "fa-solid fa-play";
                 camBtnText.innerText = translations[currentLang].startBtn;
@@ -340,8 +349,13 @@
         }
 
         function stopCamera() {
-            if (webcam) webcam.stop();
-            if (animationId) cancelAnimationFrame(animationId);
+            if (webcam) {
+                webcam.stop();
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
             isCameraOn = false;
 
             document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-amber-400";
@@ -352,7 +366,7 @@
 
             document.getElementById("webcam-container").innerHTML = `
                 <div id="placeholderText" class="text-center p-6 opacity-50 flex flex-col items-center space-y-3">
-                    <i class="fa-solid fa-camera text-4xl text-sky-400 animate-bounce"></i>
+                    <i class="fa-solid fa-camera text-4xl text-sky-400"></i>
                     <p class="text-xs">${translations[currentLang].placeholder}</p>
                 </div>
             `;
@@ -383,7 +397,6 @@
                 }
             }
 
-            // 수치 전면 제거, 오직 상태 이름만 출력
             document.getElementById('coreMainClassName').innerText = topPrediction.className;
 
             let subHTML = "";
@@ -392,7 +405,7 @@
                 const activeStyle = isActive ? "border-sky-400 bg-sky-400/10 font-bold text-sky-400 shadow-sm" : "opacity-60";
                 
                 subHTML += `
-                    <div class="p-2.5 rounded-xl border flex items-center justify-center text-xs transition-all duration-300 ${activeStyle}" style="border-color: var(--border-card);">
+                    <div class="p-2.5 rounded-xl border flex items-center justify-center text-xs transition duration-200 ${activeStyle}" style="border-color: var(--border-card);">
                         <span class="truncate">${prediction[i].className}</span>
                     </div>
                 `;
