@@ -276,7 +276,6 @@
             }
         }
 
-        // 테마 토글
         const themeToggleBtn = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
@@ -323,13 +322,14 @@
                     isModelLoaded = true;
                 }
 
-                if (!webcam) {
-                    webcam = new tmImage.Webcam(420, 315, true);
-                    await webcam.setup();
-                } else {
-                    await webcam.setup();
+                // [버그 수정 핵심]: 기존 웹캠 객체가 있다면 완전히 정지 후 재생성하여 스트림 충돌 방지
+                if (webcam) {
+                    try { await webcam.stop(); } catch(e) {}
+                    webcam = null;
                 }
-                
+
+                webcam = new tmImage.Webcam(420, 315, true);
+                await webcam.setup();
                 await webcam.play();
                 
                 const webcamContainer = document.getElementById("webcam-container");
@@ -356,14 +356,18 @@
         }
 
         function stopCamera() {
-            if (webcam) {
-                webcam.stop();
-            }
+            isCameraOn = false;
+            
             if (animationId) {
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
-            isCameraOn = false;
+
+            if (webcam) {
+                try {
+                    webcam.stop();
+                } catch(e) {}
+            }
 
             document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-amber-400";
             document.getElementById('statusText').innerText = translations[currentLang].statusStandby;
@@ -387,14 +391,16 @@
         }
 
         async function loop() {
-            if (!isCameraOn) return;
+            if (!isCameraOn || !webcam) return;
             webcam.update();
             await predict();
-            animationId = window.requestAnimationFrame(loop);
+            if (isCameraOn) {
+                animationId = window.requestAnimationFrame(loop);
+            }
         }
 
         async function predict() {
-            if (!isCameraOn) return;
+            if (!isCameraOn || !model || !webcam) return;
             const prediction = await model.predict(webcam.canvas);
             
             let topPrediction = prediction[0];
