@@ -91,7 +91,7 @@
                     <option value="en">🇺🇸 English</option>
                 </select>
 
-                <!-- 낮/밤 직관적 아이콘 테마 토글 버튼 -->
+                <!-- 테마 토글 버튼 (낮/밤 직관적 아이콘) -->
                 <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95" style="background-color: var(--accent-sub); border-color: var(--border-card);">
                     <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-sm"></i>
                 </button>
@@ -134,7 +134,7 @@
             </div>
         </div>
 
-        <!-- Right: Visualization Mechanism (Neural Core & Velocity) -->
+        <!-- Right: Neural Pulse Reactor & Velocity -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
             <div class="warm-card rounded-3xl p-6 flex flex-col items-center text-center relative">
                 <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 tracking-wide w-full justify-start">
@@ -152,11 +152,11 @@
                     </div>
                 </div>
 
-                <!-- 실시간 변화 속도 (Velocity) 지표 표시 (조정 바 제외) -->
+                <!-- 실시간 변화 속도 (Velocity) 지표 -->
                 <div class="w-full mt-4 pt-4 border-t flex justify-between items-center text-xs font-semibold" style="border-color: var(--border-card);">
                     <span class="flex items-center space-x-1.5 opacity-80">
                         <i class="fa-solid fa-gauge-high text-[#E07A5F]"></i>
-                        <span data-i18n="velocityLabel">실시간 변화 속도 (Velocity)</span>
+                        <span data-i18n="velocityLabel">실시간 변화 속도</span>
                     </span>
                     <span id="velocityValue" class="text-[#E07A5F] font-bold font-mono">0.0 px/s</span>
                 </div>
@@ -237,10 +237,11 @@
             }
         });
 
-        // 사용자가 제공한 티처블 머신 공유 링크 적용 완료
-        const URL = "https://teachablemachine.withgoogle.com/models/QUqC192tV/";
+        // 💡 URL 끝에 슬래시 유무와 상관없이 정상 동작하도록 자동 보정하는 안전한 방식 적용
+        const RAW_URL = "https://teachablemachine.withgoogle.com/models/QUqC192tV/";
+        const BASE_URL = RAW_URL.endsWith('/') ? RAW_URL : RAW_URL + '/';
 
-        let model, webcam, labelContainer, maxPredictions;
+        let model, webcam, maxPredictions;
         let isInitialized = false;
         let lastTopProb = 0;
         let lastTime = Date.now();
@@ -253,8 +254,8 @@
             startBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> SYNCING...`;
 
             try {
-                const modelURL = URL + "model.json";
-                const metadataURL = URL + "metadata.json";
+                const modelURL = BASE_URL + "model.json";
+                const metadataURL = BASE_URL + "metadata.json";
 
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
@@ -277,7 +278,7 @@
 
             } catch (error) {
                 console.error("Initialization error:", error);
-                alert(currentLang === 'ko' ? "모델 동기화 실패! 네트워크 상태를 확인하세요." : "Model sync failed! Please check your network.");
+                alert(currentLang === 'ko' ? "모델 동기화 실패! 링크 또는 네트워크 상태를 확인하세요." : "Model sync failed! Please check your network.");
                 startBtn.disabled = false;
                 startBtn.innerHTML = `<i class="fa-solid fa-play"></i> ${translations[currentLang].startBtn}`;
             }
