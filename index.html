@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 상태 모니터링</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>실시간 상태 모니터링 v2.0</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -34,36 +37,36 @@
         }
         
         :root {
-            --bg-main: #FBF9F5;
-            --bg-card: rgba(255, 255, 255, 0.85);
-            --border-card: rgba(239, 236, 230, 0.8);
+            --bg-main: #F4F1EA;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --border-card: rgba(226, 221, 212, 0.9);
             --text-main: #2D2A26;
             --text-sub: #78716C;
             --accent-warm: #E07A5F;
-            --accent-sub: #F4F1EA;
+            --accent-sub: #EFECE6;
         }
         [data-theme="dark"] {
-            --bg-main: #1C1A18;
-            --bg-card: rgba(38, 36, 33, 0.85);
-            --border-card: rgba(56, 53, 49, 0.8);
+            --bg-main: #141312;
+            --bg-card: rgba(28, 26, 24, 0.9);
+            --border-card: rgba(46, 43, 40, 0.9);
             --text-main: #F5F2EC;
             --text-sub: #A8A29E;
             --accent-warm: #E07A5F;
-            --accent-sub: rgba(51, 47, 44, 0.8);
+            --accent-sub: rgba(40, 37, 34, 0.9);
         }
 
-        /* 아이폰 스타일 글래스모피즘 (Glassmorphism) 재질감 */
+        /* 아이폰 스타일 글래스모피즘 (Glassmorphism) */
         .glass-card {
             background-color: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-card);
-            box-shadow: 0 12px 40px -10px rgba(45, 42, 38, 0.06);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .glass-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 48px -10px rgba(45, 42, 38, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
 
         .glass-header {
@@ -80,30 +83,30 @@
     <header class="sticky top-0 z-50 glass-header">
         <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-[#E07A5F] flex items-center justify-center text-white shadow-md shadow-[#E07A5F]/20 transition transform hover:scale-105">
-                    <i class="fa-solid fa-eye text-lg"></i>
+                <div class="w-10 h-10 rounded-2xl bg-[#E07A5F] flex items-center justify-center text-white shadow-lg shadow-[#E07A5F]/30 transition transform hover:scale-110">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
                 </div>
                 <div>
-                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링</span>
+                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링 v2</span>
                     <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="headerSub">실시간 현황판</span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-3">
-                <!-- 개선된 언어 선택 UI (아이폰 스타일 글래스 드롭다운) -->
+                <!-- 개선된 4개국어 지원 드롭다운 UI -->
                 <div class="relative">
-                    <select id="langSelect" class="text-xs rounded-xl px-3.5 py-2.5 outline-none cursor-pointer transition font-medium appearance-none pr-8 shadow-sm" style="background-color: var(--accent-sub); border: 1px solid var(--border-card); color: var(--text-main);">
+                    <select id="langSelect" class="text-xs rounded-xl px-4 py-2.5 outline-none cursor-pointer transition font-medium appearance-none pr-9 shadow-sm" style="background-color: var(--accent-sub); border: 1px solid var(--border-card); color: var(--text-main);">
                         <option value="ko">🇰🇷 한국어</option>
                         <option value="en">🇺🇸 English</option>
                         <option value="ja">🇯🇵 日本語</option>
                         <option value="zh">🇨🇳 中文</option>
                     </select>
-                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">
                         <i class="fa-solid fa-chevron-down"></i>
                     </div>
                 </div>
 
-                <!-- 테마 토글 버튼 (애니메이션 추가) -->
+                <!-- 테마 토글 버튼 -->
                 <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm" style="background-color: var(--accent-sub); border-color: var(--border-card);">
                     <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-sm"></i>
                 </button>
@@ -123,7 +126,7 @@
                         <span data-i18n="feedTitle">실시간 카메라 영상</span>
                     </h2>
                     
-                    <!-- 카메라 ON/OFF 버튼 (마이크로 애니메이션) -->
+                    <!-- 카메라 ON/OFF 버튼 -->
                     <button id="camToggleBtn" onclick="toggleCamera()" class="bg-[#E07A5F] hover:bg-[#d06b50] text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-md shadow-[#E07A5F]/20 text-xs flex items-center space-x-2 transform hover:-translate-y-0.5 active:scale-95">
                         <i id="camBtnIcon" class="fa-solid fa-play"></i>
                         <span id="camBtnText" data-i18n="startBtn">카메라 시작하기</span>
@@ -145,7 +148,7 @@
             </div>
         </div>
 
-        <!-- Right: Status Display -->
+        <!-- Right: Status Display (수치 전면 제거, 상태명만 표시) -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
             <div class="glass-card rounded-3xl p-6 flex flex-col items-center text-center">
                 <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 w-full justify-start tracking-wide">
@@ -154,9 +157,10 @@
                 </h2>
 
                 <div class="relative w-48 h-48 my-4 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30 animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30 animate-[spin_25s_linear_infinite]"></div>
                     <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner transition-all duration-300" style="background-color: var(--accent-sub);">
                         <span class="text-[11px] font-semibold uppercase opacity-60 mb-1 tracking-wider" data-i18n="currentState">현재 상태</span>
+                        <!-- 수치 없이 상태 이름만 출력 -->
                         <span id="coreMainClassName" class="modern-font text-2xl font-bold text-[#E07A5F] truncate max-w-[150px] transition-all duration-300">-</span>
                     </div>
                 </div>
@@ -166,7 +170,7 @@
                 </div>
             </div>
 
-            <!-- 하단 상태 목록 칩 -->
+            <!-- 하단 상태 목록 칩 (수치 없음) -->
             <div id="label-container" class="glass-card rounded-2xl p-4 grid grid-cols-2 gap-3">
                 <div class="col-span-2 text-center py-4 text-xs opacity-40 font-medium" data-i18n="waitingModel">
                     모델 로딩 대기 중...
@@ -187,7 +191,7 @@
     <script>
         const translations = {
             ko: {
-                headerSub: "실시간 현황판",
+                headerSub: "실시간 현황판 v2",
                 feedTitle: "실시간 카메라 영상",
                 startBtn: "카메라 시작하기",
                 stopBtn: "카메라 끄기",
@@ -200,7 +204,7 @@
                 waitingModel: "모델 로딩 대기 중..."
             },
             en: {
-                headerSub: "Live Dashboard",
+                headerSub: "Live Dashboard v2",
                 feedTitle: "Live Camera Stream",
                 startBtn: "Start Camera",
                 stopBtn: "Stop Camera",
@@ -213,7 +217,7 @@
                 waitingModel: "Waiting for model..."
             },
             ja: {
-                headerSub: "リアルタイム状況盤",
+                headerSub: "リアルタイム状況盤 v2",
                 feedTitle: "ライブカメラ映像",
                 startBtn: "カメラ開始",
                 stopBtn: "カメラ停止",
@@ -226,7 +230,7 @@
                 waitingModel: "モデルの読み込み待ち..."
             },
             zh: {
-                headerSub: "实时状态面板",
+                headerSub: "实时状态面板 v2",
                 feedTitle: "实时相机画面",
                 startBtn: "开启相机",
                 stopBtn: "关闭相机",
@@ -382,6 +386,7 @@
                 }
             }
 
+            // 오직 상태 이름만 출력 (수치 전면 제거 유지)
             document.getElementById('coreMainClassName').innerText = topPrediction.className;
 
             let subHTML = "";
