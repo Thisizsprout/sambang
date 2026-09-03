@@ -35,8 +35,8 @@
         
         :root {
             --bg-main: #FBF9F5;
-            --bg-card: #FFFFFF;
-            --border-card: #EFECE6;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-card: rgba(239, 236, 230, 0.8);
             --text-main: #2D2A26;
             --text-sub: #78716C;
             --accent-warm: #E07A5F;
@@ -44,43 +44,67 @@
         }
         [data-theme="dark"] {
             --bg-main: #1C1A18;
-            --bg-card: #262421;
-            --border-card: #383531;
+            --bg-card: rgba(38, 36, 33, 0.85);
+            --border-card: rgba(56, 53, 49, 0.8);
             --text-main: #F5F2EC;
             --text-sub: #A8A29E;
             --accent-warm: #E07A5F;
-            --accent-sub: #332F2C;
+            --accent-sub: rgba(51, 47, 44, 0.8);
         }
 
-        .warm-card {
+        /* 아이폰 스타일 글래스모피즘 (Glassmorphism) 재질감 */
+        .glass-card {
             background-color: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border-card);
-            box-shadow: 0 10px 30px -5px rgba(45, 42, 38, 0.04);
+            box-shadow: 0 12px 40px -10px rgba(45, 42, 38, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 48px -10px rgba(45, 42, 38, 0.1);
+        }
+
+        .glass-header {
+            background-color: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-card);
         }
     </style>
 </head>
-<body style="background-color: var(--bg-main); color: var(--text-main);" class="min-h-screen flex flex-col justify-between">
+<body style="background-color: var(--bg-main); color: var(--text-main);" class="min-h-screen flex flex-col justify-between selection:bg-[#E07A5F] selection:text-white">
 
     <!-- Header -->
-    <header class="border-b sticky top-0 z-50 backdrop-blur-md" style="border-color: var(--border-card); background-color: var(--bg-main)/80;">
+    <header class="sticky top-0 z-50 glass-header">
         <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-[#E07A5F] flex items-center justify-center text-white shadow-md">
+                <div class="w-10 h-10 rounded-2xl bg-[#E07A5F] flex items-center justify-center text-white shadow-md shadow-[#E07A5F]/20 transition transform hover:scale-105">
                     <i class="fa-solid fa-eye text-lg"></i>
                 </div>
                 <div>
-                    <span class="modern-font text-lg font-bold">상태 모니터링</span>
-                    <span class="block text-[10px] uppercase opacity-60">실시간 현황판</span>
+                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링</span>
+                    <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="headerSub">실시간 현황판</span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-3">
-                <select id="langSelect" class="border text-xs rounded-xl px-3 py-2 outline-none cursor-pointer" style="background-color: var(--accent-sub); border-color: var(--border-card); color: var(--text-main);">
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="en">🇺🇸 English</option>
-                </select>
+                <!-- 개선된 언어 선택 UI (아이폰 스타일 글래스 드롭다운) -->
+                <div class="relative">
+                    <select id="langSelect" class="text-xs rounded-xl px-3.5 py-2.5 outline-none cursor-pointer transition font-medium appearance-none pr-8 shadow-sm" style="background-color: var(--accent-sub); border: 1px solid var(--border-card); color: var(--text-main);">
+                        <option value="ko">🇰🇷 한국어</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ja">🇯🇵 日本語</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                    <div class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
 
-                <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center" style="background-color: var(--accent-sub); border-color: var(--border-card);">
+                <!-- 테마 토글 버튼 (애니메이션 추가) -->
+                <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 shadow-sm" style="background-color: var(--accent-sub); border-color: var(--border-card);">
                     <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-sm"></i>
                 </button>
             </div>
@@ -92,59 +116,58 @@
         
         <!-- Left: Webcam -->
         <div class="lg:col-span-7 flex flex-col space-y-6">
-            <div class="warm-card rounded-3xl p-6">
+            <div class="glass-card rounded-3xl p-6">
                 <div class="flex items-center justify-between mb-5">
-                    <h2 class="modern-font text-sm font-bold flex items-center space-x-2">
+                    <h2 class="modern-font text-sm font-bold flex items-center space-x-2 tracking-wide">
                         <i class="fa-solid fa-video text-[#E07A5F]"></i>
                         <span data-i18n="feedTitle">실시간 카메라 영상</span>
                     </h2>
                     
-                    <!-- 카메라 ON/OFF 토글 버튼 -->
-                    <button id="camToggleBtn" onclick="toggleCamera()" class="bg-[#E07A5F] hover:bg-[#d06b50] text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-md text-xs flex items-center space-x-2">
+                    <!-- 카메라 ON/OFF 버튼 (마이크로 애니메이션) -->
+                    <button id="camToggleBtn" onclick="toggleCamera()" class="bg-[#E07A5F] hover:bg-[#d06b50] text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-md shadow-[#E07A5F]/20 text-xs flex items-center space-x-2 transform hover:-translate-y-0.5 active:scale-95">
                         <i id="camBtnIcon" class="fa-solid fa-play"></i>
                         <span id="camBtnText" data-i18n="startBtn">카메라 시작하기</span>
                     </button>
                 </div>
 
-                <div class="relative aspect-video w-full bg-black/5 rounded-2xl overflow-hidden border flex items-center justify-center">
+                <div class="relative aspect-video w-full bg-black/5 rounded-2xl overflow-hidden border border-black/5 flex items-center justify-center shadow-inner">
                     <div id="webcam-container" class="w-full h-full flex items-center justify-center">
                         <div id="placeholderText" class="text-center p-6 opacity-40 flex flex-col items-center space-y-3">
-                            <i class="fa-solid fa-camera text-4xl text-[#E07A5F]"></i>
-                            <p class="text-xs" data-i18n="placeholder">버튼을 눌러 카메라를 연결하세요.</p>
+                            <i class="fa-solid fa-camera text-4xl text-[#E07A5F] animate-pulse"></i>
+                            <p class="text-xs font-medium tracking-wide" data-i18n="placeholder">버튼을 눌러 카메라를 연결하세요.</p>
                         </div>
                     </div>
-                    <div class="absolute top-4 left-4 border px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center space-x-2 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-card);">
-                        <span class="w-2 h-2 rounded-full bg-amber-500" id="statusDot"></span>
+                    <div class="absolute top-4 left-4 backdrop-blur-md border px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center space-x-2 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-card);">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 transition-colors duration-300" id="statusDot"></span>
                         <span id="statusText" data-i18n="statusStandby">대기 중</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Status Display (수치 전면 제거, 오직 상태명만 표시) -->
+        <!-- Right: Status Display -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
-            <div class="warm-card rounded-3xl p-6 flex flex-col items-center text-center">
-                <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 w-full justify-start">
+            <div class="glass-card rounded-3xl p-6 flex flex-col items-center text-center">
+                <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 w-full justify-start tracking-wide">
                     <i class="fa-solid fa-chart-simple text-[#E07A5F]"></i>
                     <span data-i18n="analyticsTitle">현재 인식 상태</span>
                 </h2>
 
                 <div class="relative w-48 h-48 my-4 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30"></div>
-                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner" style="background-color: var(--accent-sub);">
-                        <span class="text-[11px] font-semibold uppercase opacity-60 mb-1" data-i18n="currentState">현재 상태</span>
-                        <!-- 수치 없이 오직 상태명만 크게 출력 -->
-                        <span id="coreMainClassName" class="modern-font text-2xl font-bold text-[#E07A5F] truncate max-w-[150px]">-</span>
+                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30 animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner transition-all duration-300" style="background-color: var(--accent-sub);">
+                        <span class="text-[11px] font-semibold uppercase opacity-60 mb-1 tracking-wider" data-i18n="currentState">현재 상태</span>
+                        <span id="coreMainClassName" class="modern-font text-2xl font-bold text-[#E07A5F] truncate max-w-[150px] transition-all duration-300">-</span>
                     </div>
                 </div>
 
-                <div class="w-full mt-4 pt-4 border-t text-xs text-left opacity-60" style="border-color: var(--border-card);" data-i18n="guideText">
+                <div class="w-full mt-4 pt-4 border-t text-xs text-left opacity-60 leading-relaxed" style="border-color: var(--border-card);" data-i18n="guideText">
                     * 카메라 화면을 분석하여 해당하는 상태(예: 적음, 많음)를 표시합니다.
                 </div>
             </div>
 
-            <!-- 하단 상태 목록 칩 (수치 없음) -->
-            <div id="label-container" class="warm-card rounded-2xl p-4 grid grid-cols-2 gap-3">
+            <!-- 하단 상태 목록 칩 -->
+            <div id="label-container" class="glass-card rounded-2xl p-4 grid grid-cols-2 gap-3">
                 <div class="col-span-2 text-center py-4 text-xs opacity-40 font-medium" data-i18n="waitingModel">
                     모델 로딩 대기 중...
                 </div>
@@ -153,7 +176,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t py-6 text-center text-xs opacity-50" style="border-color: var(--border-card);">
+    <footer class="border-t py-6 text-center text-xs opacity-50 transition-colors" style="border-color: var(--border-card);">
         <p>&copy; 2026 AI MONITORING SYSTEM. ALL RIGHTS RESERVED.</p>
     </footer>
 
@@ -164,6 +187,7 @@
     <script>
         const translations = {
             ko: {
+                headerSub: "실시간 현황판",
                 feedTitle: "실시간 카메라 영상",
                 startBtn: "카메라 시작하기",
                 stopBtn: "카메라 끄기",
@@ -176,6 +200,7 @@
                 waitingModel: "모델 로딩 대기 중..."
             },
             en: {
+                headerSub: "Live Dashboard",
                 feedTitle: "Live Camera Stream",
                 startBtn: "Start Camera",
                 stopBtn: "Stop Camera",
@@ -186,6 +211,32 @@
                 currentState: "Status",
                 guideText: "* Displays the detected state (e.g., low, high) in real time.",
                 waitingModel: "Waiting for model..."
+            },
+            ja: {
+                headerSub: "リアルタイム状況盤",
+                feedTitle: "ライブカメラ映像",
+                startBtn: "カメラ開始",
+                stopBtn: "カメラ停止",
+                placeholder: "ボタンを押してカメラを接続してください。",
+                statusStandby: "待機中",
+                statusActive: "分析中",
+                analyticsTitle: "現在の認識状態",
+                currentState: "現在の状態",
+                guideText: "* カメラ映像を分析し、該当する状態（少ない、多いなど）を表示します。",
+                waitingModel: "モデルの読み込み待ち..."
+            },
+            zh: {
+                headerSub: "实时状态面板",
+                feedTitle: "实时相机画面",
+                startBtn: "开启相机",
+                stopBtn: "关闭相机",
+                placeholder: "点击按钮连接相机。",
+                statusStandby: "待机中",
+                statusActive: "监控中",
+                analyticsTitle: "当前识别状态",
+                currentState: "当前状态",
+                guideText: "* 分析相机画面并显示对应状态（例如：少、多）。",
+                waitingModel: "等待模型加载中..."
             }
         };
 
@@ -248,7 +299,7 @@
             const camToggleBtn = document.getElementById('camToggleBtn');
             
             camToggleBtn.disabled = true;
-            camBtnText.innerText = "연결 중...";
+            camBtnText.innerText = "...";
 
             try {
                 if (!isModelLoaded) {
@@ -300,7 +351,7 @@
 
             document.getElementById("webcam-container").innerHTML = `
                 <div id="placeholderText" class="text-center p-6 opacity-40 flex flex-col items-center space-y-3">
-                    <i class="fa-solid fa-camera text-4xl text-[#E07A5F]"></i>
+                    <i class="fa-solid fa-camera text-4xl text-[#E07A5F] animate-pulse"></i>
                     <p class="text-xs">${translations[currentLang].placeholder}</p>
                 </div>
             `;
@@ -331,16 +382,15 @@
                 }
             }
 
-            // 오직 상태 이름만 출력 (수치 및 퍼센트 제거 완료)
             document.getElementById('coreMainClassName').innerText = topPrediction.className;
 
             let subHTML = "";
             for (let i = 0; i < maxPredictions; i++) {
                 const isActive = prediction[i].className === topPrediction.className;
-                const activeStyle = isActive ? "border-[#E07A5F] bg-[#E07A5F]/10 font-bold text-[#E07A5F]" : "opacity-60";
+                const activeStyle = isActive ? "border-[#E07A5F] bg-[#E07A5F]/10 font-bold text-[#E07A5F] shadow-sm" : "opacity-60";
                 
                 subHTML += `
-                    <div class="p-2.5 rounded-xl border flex items-center justify-center text-xs transition-all ${activeStyle}" style="border-color: var(--border-card);">
+                    <div class="p-2.5 rounded-xl border flex items-center justify-center text-xs transition-all duration-300 ${activeStyle}" style="border-color: var(--border-card);">
                         <span class="truncate">${prediction[i].className}</span>
                     </div>
                 `;
