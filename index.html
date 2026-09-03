@@ -59,7 +59,6 @@
             box-shadow: 0 10px 30px -5px rgba(45, 42, 38, 0.04);
         }
 
-        /* 새로운 원형 맥박 시각화 애니메이션 */
         @keyframes pulse-core {
             0% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
@@ -92,7 +91,7 @@
                     <option value="en">🇺🇸 English</option>
                 </select>
 
-                <!-- 낮/밤 직관적 아이콘이 적용된 테마 토글 버튼 -->
+                <!-- 낮/밤 직관적 아이콘 테마 토글 버튼 -->
                 <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95" style="background-color: var(--accent-sub); border-color: var(--border-card);">
                     <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-sm"></i>
                 </button>
@@ -135,7 +134,7 @@
             </div>
         </div>
 
-        <!-- Right: New Visualization Mechanism (Neural Core & Velocity) -->
+        <!-- Right: Visualization Mechanism (Neural Core & Velocity) -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
             <div class="warm-card rounded-3xl p-6 flex flex-col items-center text-center relative">
                 <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 tracking-wide w-full justify-start">
@@ -143,7 +142,7 @@
                     <span data-i18n="analyticsTitle">NEURAL PULSE REACTOR</span>
                 </h2>
 
-                <!-- 새로운 시각화 메커니즘: 중앙 집중형 코어 링 -->
+                <!-- 중앙 집중형 코어 링 -->
                 <div class="relative w-48 h-48 my-4 flex items-center justify-center">
                     <div id="pulseCoreRing" class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30 pulse-reactor"></div>
                     <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center shadow-inner transition-all duration-300" style="background-color: var(--accent-sub);">
@@ -153,25 +152,17 @@
                     </div>
                 </div>
 
-                <!-- 실시간 변화 속도 (Velocity) 표시 및 조정 영역 -->
-                <div class="w-full mt-6 pt-6 border-t" style="border-color: var(--border-card);">
-                    <div class="flex justify-between items-center text-xs font-semibold mb-2">
-                        <span class="flex items-center space-x-1.5 opacity-80">
-                            <i class="fa-solid fa-gauge-high text-[#E07A5F]"></i>
-                            <span data-i18n="velocityLabel">실시간 변화 속도 (Velocity)</span>
-                        </span>
-                        <span id="velocityValue" class="text-[#E07A5F] font-bold font-mono">0.0 px/s</span>
-                    </div>
-                    <!-- 변화 속도 감도 조절 슬라이더 -->
-                    <div class="flex items-center space-x-3">
-                        <span class="text-[10px] opacity-50" data-i18n="slow">둔감</span>
-                        <input id="sensitivitySlider" type="range" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full accent-[#E07A5F] cursor-pointer">
-                        <span class="text-[10px] opacity-50" data-i18n="fast">민감</span>
-                    </div>
+                <!-- 실시간 변화 속도 (Velocity) 지표 표시 (조정 바 제외) -->
+                <div class="w-full mt-4 pt-4 border-t flex justify-between items-center text-xs font-semibold" style="border-color: var(--border-card);">
+                    <span class="flex items-center space-x-1.5 opacity-80">
+                        <i class="fa-solid fa-gauge-high text-[#E07A5F]"></i>
+                        <span data-i18n="velocityLabel">실시간 변화 속도 (Velocity)</span>
+                    </span>
+                    <span id="velocityValue" class="text-[#E07A5F] font-bold font-mono">0.0 px/s</span>
                 </div>
             </div>
 
-            <!-- 하단 미세 분석 리스트 (서브 클래스용 깔끔한 칩 형태) -->
+            <!-- 하단 미세 분석 리스트 칩 -->
             <div id="label-container" class="warm-card rounded-2xl p-4 grid grid-cols-2 gap-3">
                 <div class="col-span-2 text-center py-4 text-xs opacity-40 font-medium" data-i18n="waitingModel">
                     모델 동기화 대기 중...
@@ -199,9 +190,7 @@
                 statusStandby: "대기 중",
                 statusActive: "AI 뉴럴 가동 중",
                 analyticsTitle: "뉴럴 펄스 리액터",
-                velocityLabel: "실시간 변화 속도 (Velocity)",
-                slow: "둔감",
-                fast: "민감",
+                velocityLabel: "실시간 변화 속도",
                 waitingModel: "모델 동기화 대기 중..."
             },
             en: {
@@ -213,8 +202,6 @@
                 statusActive: "NEURAL ACTIVE",
                 analyticsTitle: "NEURAL PULSE REACTOR",
                 velocityLabel: "Real-time Velocity",
-                slow: "Slow",
-                fast: "Fast",
                 waitingModel: "Waiting for synchronization..."
             }
         };
@@ -234,7 +221,7 @@
             });
         }
 
-        // 낮/밤 직관적 아이콘이 적용된 테마 토글 핸들러
+        // 테마 토글 (태양 / 초승달 아이콘 전환)
         const themeToggleBtn = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
@@ -243,19 +230,15 @@
             const currentTheme = htmlElement.getAttribute('data-theme');
             if (currentTheme === 'light') {
                 htmlElement.setAttribute('data-theme', 'dark');
-                // 밤을 상징하는 초승달 아이콘으로 변경
                 themeIcon.className = "fa-solid fa-moon text-indigo-300 text-sm";
             } else {
                 htmlElement.setAttribute('data-theme', 'light');
-                // 낮/햇살을 상징하는 태양 아이콘으로 변경
                 themeIcon.className = "fa-solid fa-sun text-amber-500 text-sm";
             }
         });
 
-        // =====================================================================
-        // 💡 [사용법] 티처블 머신 공유 링크를 아래 변수에 입력하세요!
-        // =====================================================================
-        const URL = "https://teachablemachine.withgoogle.com/models/https://teachablemachine.withgoogle.com/models/QUqC192tV/";
+        // 사용자가 제공한 티처블 머신 공유 링크 적용 완료
+        const URL = "https://teachablemachine.withgoogle.com/models/QUqC192tV/";
 
         let model, webcam, labelContainer, maxPredictions;
         let isInitialized = false;
@@ -264,11 +247,6 @@
 
         async function init() {
             if (isInitialized) return;
-
-            if (URL.includes("여기에_본인의_공유링크를_넣으세요")) {
-                alert("코드 내부의 'URL' 변수에 티처블 머신 공유 링크를 입력해야 정상 작동합니다!");
-                return;
-            }
             
             const startBtn = document.getElementById('startBtn');
             startBtn.disabled = true;
@@ -299,7 +277,7 @@
 
             } catch (error) {
                 console.error("Initialization error:", error);
-                alert("모델 동기화 실패! 티처블 머신 공유 링크를 확인하세요.");
+                alert(currentLang === 'ko' ? "모델 동기화 실패! 네트워크 상태를 확인하세요." : "Model sync failed! Please check your network.");
                 startBtn.disabled = false;
                 startBtn.innerHTML = `<i class="fa-solid fa-play"></i> ${translations[currentLang].startBtn}`;
             }
@@ -314,7 +292,6 @@
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             
-            // 가장 높은 확률을 가진 클래스 탐색
             let topPrediction = prediction[0];
             for (let i = 1; i < maxPredictions; i++) {
                 if (prediction[i].probability > topPrediction.probability) {
@@ -325,30 +302,25 @@
             const currentProbVal = topPrediction.probability;
             const percentage = (currentProbVal * 100).toFixed(1);
 
-            // 1. 새로운 시각화 메커니즘 (코어 링 동적 반응 업데이트)
             document.getElementById('coreTopLabel').innerText = currentLang === 'ko' ? "현재 인식 상태" : "ACTIVE STATE";
             document.getElementById('coreMainProb').innerText = `${percentage}%`;
             document.getElementById('coreSubClass').innerText = topPrediction.className.toUpperCase();
             
-            // 확률에 따라 코어 링의 숨쉬는 속도 및 크기 동적 조절
             const pulseRing = document.getElementById('pulseCoreRing');
             const scaleFactor = 1 + (currentProbVal * 0.1);
             pulseRing.style.transform = `scale(${scaleFactor})`;
 
-            // 2. 실시간 변화 속도 (Velocity) 계산 및 조정 반영
             const now = Date.now();
-            const timeDiff = (now - lastTime) / 1000; // 초 단위 시간차
-            if (timeDiff > 0.1) { // 100ms마다 속도 갱신
-                const sensitivity = parseFloat(document.getElementById('sensitivitySlider').value);
+            const timeDiff = (now - lastTime) / 1000;
+            if (timeDiff > 0.1) {
                 const probDiff = Math.abs(currentProbVal - lastTopProb);
-                const velocity = ((probDiff / timeDiff) * 100 * sensitivity).toFixed(1);
+                const velocity = ((probDiff / timeDiff) * 100).toFixed(1);
                 
                 document.getElementById('velocityValue').innerText = `${velocity} px/s`;
                 lastTopProb = currentProbVal;
                 lastTime = now;
             }
 
-            // 3. 하단 서브 칩 리스트 업데이트
             let subHTML = "";
             for (let i = 0; i < maxPredictions; i++) {
                 const p = (prediction[i].probability * 100).toFixed(0);
