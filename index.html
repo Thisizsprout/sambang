@@ -95,7 +95,7 @@
                     <i class="fa-solid fa-bolt text-lg"></i>
                 </div>
                 <div>
-                    <span class="modern-font text-lg font-bold tracking-tight">상태 모니터링</span>
+                    <span class="modern-font text-lg font-bold tracking-tight" data-i18n="headerTitle">상태 모니터링</span>
                     <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="headerSub">실시간 현황판</span>
                 </div>
             </div>
@@ -196,6 +196,7 @@
     <script>
         const translations = {
             ko: {
+                headerTitle: "상태 모니터링",
                 headerSub: "실시간 현황판",
                 feedTitle: "실시간 카메라 영상",
                 startBtn: "카메라 시작하기",
@@ -210,6 +211,7 @@
                 errorMsg: "카메라 권한을 확인하거나 장치를 연결할 수 없습니다."
             },
             en: {
+                headerTitle: "Status Monitor",
                 headerSub: "Live Dashboard",
                 feedTitle: "Live Camera Stream",
                 startBtn: "Start Camera",
@@ -224,6 +226,7 @@
                 errorMsg: "Could not access camera or load model."
             },
             ja: {
+                headerTitle: "状態モニタリング",
                 headerSub: "リアルタイム状況盤",
                 feedTitle: "ライブカメラ映像",
                 startBtn: "カメラ開始",
@@ -238,6 +241,7 @@
                 errorMsg: "カメラへのアクセスに失敗しました。"
             },
             zh: {
+                headerTitle: "状态监控",
                 headerSub: "实时状态面板",
                 feedTitle: "实时相机画面",
                 startBtn: "开启相机",
@@ -254,19 +258,23 @@
         };
 
         let currentLang = 'ko';
-        document.getElementById('langSelect').addEventListener('change', (e) => {
+        const langSelect = document.getElementById('langSelect');
+
+        langSelect.addEventListener('change', (e) => {
             currentLang = e.target.value;
             updateTexts();
         });
 
         function updateTexts() {
+            // [핵심 수정]: data-i18n 속성을 가진 모든 요소를 찾아 현재 언어로 즉시 텍스트 변경
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (translations[currentLang][key]) {
+                if (translations[currentLang] && translations[currentLang][key]) {
                     el.innerText = translations[currentLang][key];
                 }
             });
             
+            // 버튼 상태에 따른 텍스트 동기화
             if (isCameraOn) {
                 document.getElementById('camBtnText').innerText = translations[currentLang].stopBtn;
                 document.getElementById('statusText').innerText = translations[currentLang].statusActive;
@@ -322,7 +330,6 @@
                     isModelLoaded = true;
                 }
 
-                // [버그 수정 핵심]: 기존 웹캠 객체가 있다면 완전히 정지 후 재생성하여 스트림 충돌 방지
                 if (webcam) {
                     try { await webcam.stop(); } catch(e) {}
                     webcam = null;
@@ -364,9 +371,7 @@
             }
 
             if (webcam) {
-                try {
-                    webcam.stop();
-                } catch(e) {}
+                try { webcam.stop(); } catch(e) {}
             }
 
             document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-amber-400";
@@ -384,7 +389,7 @@
 
             document.getElementById('coreMainClassName').innerText = "-";
             document.getElementById('label-container').innerHTML = `
-                <div class="col-span-2 text-center py-4 text-xs opacity-50 font-medium">
+                <div class="col-span-2 text-center py-4 text-xs opacity-50 font-medium" data-i18n="waitingModel">
                     ${translations[currentLang].waitingModel}
                 </div>
             `;
