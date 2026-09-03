@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEO-VISION | AI Analytics Dashboard</title>
+    <title>NEO-VISION | Modern Warm AI Studio</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Orbitron & Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -17,8 +17,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Orbitron', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
                 }
             }
@@ -26,134 +26,163 @@
     </script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-        .futuristic-font {
-            font-family: 'Orbitron', sans-serif;
+        .modern-font {
+            font-family: 'Outfit', sans-serif;
         }
-        .glow-box {
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+        
+        /* 라이트/다크 모드 웜톤 컬러 변수 테마 */
+        :root {
+            --bg-main: #FBF9F5;
+            --bg-card: #FFFFFF;
+            --border-card: #EFECE6;
+            --text-main: #2D2A26;
+            --text-sub: #78716C;
+            --accent-warm: #E07A5F;
+            --accent-sub: #F4F1EA;
         }
-        .dark .glow-box {
-            box-shadow: 0 0 40px rgba(16, 185, 129, 0.2);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+        [data-theme="dark"] {
+            --bg-main: #1C1A18;
+            --bg-card: #262421;
+            --border-card: #383531;
+            --text-main: #F5F2EC;
+            --text-sub: #A8A29E;
+            --accent-warm: #E07A5F;
+            --accent-sub: #332F2C;
         }
-        .scanner-line {
-            background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.4), transparent);
-            height: 20px;
-            width: 100%;
-            position: absolute;
-            top: -20px;
-            animation: scan 3s linear infinite;
-            pointer-events: none;
+
+        .warm-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-card);
+            box-shadow: 0 10px 30px -5px rgba(45, 42, 38, 0.04);
         }
-        @keyframes scan {
-            0% { top: -20px; }
-            100% { top: 100%; }
+
+        /* 새로운 원형 맥박 시각화 애니메이션 */
+        @keyframes pulse-core {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        .pulse-reactor {
+            animation: pulse-core 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
+<body style="background-color: var(--bg-main); color: var(--text-main);" class="min-h-screen flex flex-col justify-between selection:bg-[#E07A5F] selection:text-white">
 
     <!-- Header / Navbar -->
-    <header class="border-b border-slate-800/80 bg-slate-900/40 backdrop-blur-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <header class="border-b transition-colors duration-300 backdrop-blur-md sticky top-0 z-50" style="border-color: var(--border-card); background-color: var(--bg-main)/80;">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <i class="fa-solid fa-microchip text-slate-950 text-xl"></i>
+                <div class="w-10 h-10 rounded-2xl bg-[#E07A5F] flex items-center justify-center shadow-md shadow-[#E07A5F]/20 text-white">
+                    <i class="fa-solid fa-seedling text-lg"></i>
                 </div>
                 <div>
-                    <span class="futuristic-font text-xl font-black tracking-wider bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">NEO-VISION AI</span>
-                    <span class="block text-[10px] text-emerald-400 tracking-widest font-mono font-semibold" data-i18n="subtitle">REALTIME NEURAL ENGINE</span>
+                    <span class="modern-font text-lg font-bold tracking-tight">NEO-VISION</span>
+                    <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="subtitle">Warm AI Studio</span>
                 </div>
             </div>
 
             <!-- Controls: Theme & Language -->
             <div class="flex items-center space-x-3">
-                <div class="relative">
-                    <select id="langSelect" class="bg-slate-900/90 border border-slate-700/80 text-slate-200 text-xs rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block px-3 py-2.5 outline-none cursor-pointer transition font-mono">
-                        <option value="ko">🇰🇷 한국어</option>
-                        <option value="en">🇺🇸 English</option>
-                    </select>
-                </div>
+                <select id="langSelect" class="border text-xs rounded-xl px-3 py-2 outline-none cursor-pointer transition font-medium" style="background-color: var(--accent-sub); border-color: var(--border-card); color: var(--text-main);">
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="en">🇺🇸 English</option>
+                </select>
 
-                <button id="themeToggle" class="w-10 h-10 rounded-xl bg-slate-900/90 border border-slate-700/80 flex items-center justify-center text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 transition">
-                    <i id="themeIcon" class="fa-solid fa-sun text-sm"></i>
+                <!-- 낮/밤 직관적 아이콘이 적용된 테마 토글 버튼 -->
+                <button id="themeToggle" class="w-10 h-10 rounded-xl border flex items-center justify-center transition hover:scale-105 active:scale-95" style="background-color: var(--accent-sub); border-color: var(--border-card);">
+                    <i id="themeIcon" class="fa-solid fa-sun text-amber-500 text-sm"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content Grid -->
-    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+    <main class="max-w-6xl mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
         
-        <!-- Left: Webcam & Live View -->
+        <!-- Left: Webcam & Controls -->
         <div class="lg:col-span-7 flex flex-col space-y-6">
-            <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 glow-box relative overflow-hidden">
-                <div class="scanner-line"></div>
-                <div class="absolute -right-20 -top-20 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                
+            <div class="warm-card rounded-3xl p-6 relative overflow-hidden">
                 <div class="flex items-center justify-between mb-5">
-                    <h2 class="futuristic-font text-sm font-bold flex items-center space-x-2 text-slate-200 tracking-wider">
-                        <i class="fa-solid fa-video text-emerald-400"></i>
-                        <span data-i18n="feedTitle">OPTICAL SENSOR FEED</span>
+                    <h2 class="modern-font text-sm font-bold flex items-center space-x-2 tracking-wide">
+                        <i class="fa-solid fa-camera-retro text-[#E07A5F]"></i>
+                        <span data-i18n="feedTitle">OPTICAL SENSOR STREAM</span>
                     </h2>
                     
-                    <button id="startBtn" onclick="init()" class="bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center space-x-2 transform active:scale-95 text-xs font-mono tracking-wider">
-                        <i class="fa-solid fa-power-off"></i>
-                        <span data-i18n="startBtn">SYSTEM LAUNCH</span>
+                    <button id="startBtn" onclick="init()" class="bg-[#E07A5F] hover:bg-[#d06b50] text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-[#E07A5F]/20 transition-all flex items-center space-x-2 transform active:scale-95 text-xs tracking-wider">
+                        <i class="fa-solid fa-play"></i>
+                        <span data-i18n="startBtn">시스템 가동하기</span>
                     </button>
                 </div>
 
                 <!-- Webcam Display Area -->
-                <div class="relative aspect-video w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-800/80 flex items-center justify-center shadow-inner">
+                <div class="relative aspect-video w-full bg-black/5 rounded-2xl overflow-hidden border border-black/5 flex items-center justify-center shadow-inner">
                     <div id="webcam-container" class="w-full h-full flex items-center justify-center">
-                        <div id="placeholderText" class="text-center p-6 text-slate-500 flex flex-col items-center space-y-3">
-                            <i class="fa-solid fa-fingerprint text-5xl animate-pulse text-emerald-500/40"></i>
-                            <p class="text-xs font-mono tracking-wide" data-i18n="placeholder">CLICK 'SYSTEM LAUNCH' TO ACTIVATE CAMERA & AI</p>
+                        <div id="placeholderText" class="text-center p-6 opacity-40 flex flex-col items-center space-y-3">
+                            <i class="fa-solid fa-eye text-4xl text-[#E07A5F]"></i>
+                            <p class="text-xs font-medium tracking-wide" data-i18n="placeholder">버튼을 눌러 웜톤 비전 센서를 활성화하세요.</p>
                         </div>
                     </div>
                     <!-- Status Badge -->
-                    <div class="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md border border-slate-800 px-3 py-1.5 rounded-full text-[11px] font-mono text-slate-300 flex items-center space-x-2 shadow-lg">
-                        <span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" id="statusDot"></span>
-                        <span id="statusText" data-i18n="statusStandby">STANDBY</span>
+                    <div class="absolute top-4 left-4 backdrop-blur-md border px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center space-x-2 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-card);">
+                        <span class="w-2 h-2 rounded-full bg-amber-500" id="statusDot"></span>
+                        <span id="statusText" data-i18n="statusStandby">대기 중</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right: Real-time Analytics & Probabilities -->
+        <!-- Right: New Visualization Mechanism (Neural Core & Velocity) -->
         <div class="lg:col-span-5 flex flex-col space-y-6">
-            <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 glow-box">
-                <h2 class="futuristic-font text-sm font-bold flex items-center space-x-2 mb-6 text-slate-200 tracking-wider">
-                    <i class="fa-solid fa-chart-pie text-emerald-400"></i>
-                    <span data-i18n="analyticsTitle">NEURAL PROBABILITY MATRIX</span>
+            <div class="warm-card rounded-3xl p-6 flex flex-col items-center text-center relative">
+                <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 tracking-wide w-full justify-start">
+                    <i class="fa-solid fa-atom text-[#E07A5F]"></i>
+                    <span data-i18n="analyticsTitle">NEURAL PULSE REACTOR</span>
                 </h2>
 
-                <!-- Label & Progress Bar Container -->
-                <div id="label-container" class="space-y-4">
-                    <div class="text-slate-500 text-xs text-center py-10 font-mono tracking-wide" data-i18n="waitingModel">
-                        WAITING FOR NEURAL MODEL SYNCHRONIZATION...
+                <!-- 새로운 시각화 메커니즘: 중앙 집중형 코어 링 -->
+                <div class="relative w-48 h-48 my-4 flex items-center justify-center">
+                    <div id="pulseCoreRing" class="absolute inset-0 rounded-full border-4 border-dashed border-[#E07A5F]/30 pulse-reactor"></div>
+                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center shadow-inner transition-all duration-300" style="background-color: var(--accent-sub);">
+                        <span id="coreTopLabel" class="text-xs font-bold uppercase opacity-60 tracking-wider">READY</span>
+                        <span id="coreMainProb" class="modern-font text-3xl font-extrabold text-[#E07A5F] my-1">0.0%</span>
+                        <span id="coreSubClass" class="text-[11px] font-medium px-3 truncate max-w-[140px]" style="color: var(--text-sub);">-</span>
+                    </div>
+                </div>
+
+                <!-- 실시간 변화 속도 (Velocity) 표시 및 조정 영역 -->
+                <div class="w-full mt-6 pt-6 border-t" style="border-color: var(--border-card);">
+                    <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                        <span class="flex items-center space-x-1.5 opacity-80">
+                            <i class="fa-solid fa-gauge-high text-[#E07A5F]"></i>
+                            <span data-i18n="velocityLabel">실시간 변화 속도 (Velocity)</span>
+                        </span>
+                        <span id="velocityValue" class="text-[#E07A5F] font-bold font-mono">0.0 px/s</span>
+                    </div>
+                    <!-- 변화 속도 감도 조절 슬라이더 -->
+                    <div class="flex items-center space-x-3">
+                        <span class="text-[10px] opacity-50" data-i18n="slow">둔감</span>
+                        <input id="sensitivitySlider" type="range" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full accent-[#E07A5F] cursor-pointer">
+                        <span class="text-[10px] opacity-50" data-i18n="fast">민감</span>
                     </div>
                 </div>
             </div>
 
-            <!-- System Diagnostic Info -->
-            <div class="bg-slate-900/30 border border-slate-800/60 rounded-xl p-4 text-[11px] text-slate-400 flex items-center justify-between font-mono">
-                <span class="flex items-center space-x-2">
-                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
-                    <span>MODEL: TM-CLOUD-LINK</span>
-                </span>
-                <span class="text-emerald-400 font-bold">SECURE v2.4</span>
+            <!-- 하단 미세 분석 리스트 (서브 클래스용 깔끔한 칩 형태) -->
+            <div id="label-container" class="warm-card rounded-2xl p-4 grid grid-cols-2 gap-3">
+                <div class="col-span-2 text-center py-4 text-xs opacity-40 font-medium" data-i18n="waitingModel">
+                    모델 동기화 대기 중...
+                </div>
             </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 font-mono">
-        <p>&copy; 2026 NEO-VISION AI LABS. ALL RIGHTS RESERVED.</p>
+    <footer class="border-t py-6 text-center text-xs opacity-50 transition-colors" style="border-color: var(--border-card);">
+        <p>&copy; 2026 NEO-VISION WARM AI LABS. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <!-- TensorFlow.js and Teachable Machine Libraries -->
@@ -163,29 +192,34 @@
     <script>
         const translations = {
             ko: {
-                subtitle: "실시간 뉴럴 비전 엔진",
-                feedTitle: "광학 센서 비전 피드",
+                subtitle: "웜톤 모던 AI 스튜디오",
+                feedTitle: "광학 센서 스트림",
                 startBtn: "시스템 가동하기",
-                placeholder: "'시스템 가동하기' 버튼을 눌러 카메라와 AI를 연동하세요.",
+                placeholder: "버튼을 눌러 웜톤 비전 센서를 활성화하세요.",
                 statusStandby: "대기 중",
-                statusActive: "AI 뉴럴 네트워크 가동 중",
-                analyticsTitle: "뉴럴 확률 매트릭스",
-                waitingModel: "시스템이 가동되면 실시간 분석 데이터가 여기에 출력됩니다."
+                statusActive: "AI 뉴럴 가동 중",
+                analyticsTitle: "뉴럴 펄스 리액터",
+                velocityLabel: "실시간 변화 속도 (Velocity)",
+                slow: "둔감",
+                fast: "민감",
+                waitingModel: "모델 동기화 대기 중..."
             },
             en: {
-                subtitle: "REALTIME NEURAL ENGINE",
-                feedTitle: "OPTICAL SENSOR FEED",
+                subtitle: "Warm Modern AI Studio",
+                feedTitle: "OPTICAL SENSOR STREAM",
                 startBtn: "SYSTEM LAUNCH",
-                placeholder: "CLICK 'SYSTEM LAUNCH' TO ACTIVATE CAMERA & AI",
+                placeholder: "Click to activate warm vision sensor.",
                 statusStandby: "STANDBY",
-                statusActive: "NEURAL NET ACTIVE",
-                analyticsTitle: "NEURAL PROBABILITY MATRIX",
-                waitingModel: "WAITING FOR NEURAL MODEL SYNCHRONIZATION..."
+                statusActive: "NEURAL ACTIVE",
+                analyticsTitle: "NEURAL PULSE REACTOR",
+                velocityLabel: "Real-time Velocity",
+                slow: "Slow",
+                fast: "Fast",
+                waitingModel: "Waiting for synchronization..."
             }
         };
 
         let currentLang = 'ko';
-
         document.getElementById('langSelect').addEventListener('change', (e) => {
             currentLang = e.target.value;
             updateTexts();
@@ -200,33 +234,33 @@
             });
         }
 
+        // 낮/밤 직관적 아이콘이 적용된 테마 토글 핸들러
         const themeToggleBtn = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
 
         themeToggleBtn.addEventListener('click', () => {
-            if (htmlElement.getAttribute('data-theme') === 'dark') {
-                htmlElement.setAttribute('data-theme', 'light');
-                themeIcon.className = 'fa-solid fa-moon text-sm';
-                document.body.classList.remove('bg-slate-950', 'text-slate-100');
-                document.body.classList.add('bg-slate-100', 'text-slate-900');
-            } else {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            if (currentTheme === 'light') {
                 htmlElement.setAttribute('data-theme', 'dark');
-                themeIcon.className = 'fa-solid fa-sun text-sm';
-                document.body.classList.remove('bg-slate-100', 'text-slate-900');
-                document.body.classList.add('bg-slate-950', 'text-slate-100');
+                // 밤을 상징하는 초승달 아이콘으로 변경
+                themeIcon.className = "fa-solid fa-moon text-indigo-300 text-sm";
+            } else {
+                htmlElement.setAttribute('data-theme', 'light');
+                // 낮/햇살을 상징하는 태양 아이콘으로 변경
+                themeIcon.className = "fa-solid fa-sun text-amber-500 text-sm";
             }
         });
 
         // =====================================================================
-        // 💡 [사용법] 티처블 머신에서 모델 학습 후 [Export Model] -> [TensorFlow.js] 
-        // -> [Upload my model]을 누르면 나오는 공유 링크를 아래 URL에 붙여넣으세요!
-        // 이 방식을 쓰면 폴더를 따로 만들 필요 없이 index.html 파일 하나로 끝납니다.
+        // 💡 [사용법] 티처블 머신 공유 링크를 아래 변수에 입력하세요!
         // =====================================================================
-        const URL = "https://teachablemachine.withgoogle.com/models/ENy3SnLsi/";
+        const URL = "https://teachablemachine.withgoogle.com/models/여기에_본인의_공유링크를_넣으세요/";
 
         let model, webcam, labelContainer, maxPredictions;
         let isInitialized = false;
+        let lastTopProb = 0;
+        let lastTime = Date.now();
 
         async function init() {
             if (isInitialized) return;
@@ -256,35 +290,18 @@
                 webcamContainer.innerHTML = "";
                 webcamContainer.appendChild(webcam.canvas);
 
-                labelContainer = document.getElementById("label-container");
-                labelContainer.innerHTML = "";
-                for (let i = 0; i < maxPredictions; i++) {
-                    const wrapper = document.createElement("div");
-                    wrapper.className = "space-y-1.5";
-                    wrapper.innerHTML = `
-                        <div class="flex justify-between text-xs font-bold font-mono">
-                            <span id="label-name-${i}" class="text-slate-300">CLASS_${i+1}</span>
-                            <span id="label-prob-${i}" class="text-emerald-400">0.0%</span>
-                        </div>
-                        <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800 shadow-inner">
-                            <div id="bar-${i}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-75" style="width: 0%"></div>
-                        </div>
-                    `;
-                    labelContainer.appendChild(wrapper);
-                }
-
                 isInitialized = true;
-                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse";
-                document.getElementById('statusText').innerText = currentLang === 'ko' ? "AI 뉴럴 네트워크 가동 중" : "NEURAL NET ACTIVE";
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]";
+                document.getElementById('statusText').innerText = currentLang === 'ko' ? "AI 뉴럴 가동 중" : "NEURAL ACTIVE";
                 startBtn.style.display = 'none';
 
                 window.requestAnimationFrame(loop);
 
             } catch (error) {
                 console.error("Initialization error:", error);
-                alert(currentLang === 'ko' ? "모델 동기화 실패! 티처블 머신 공유 링크(URL)를 확인하세요." : "Model sync failed! Please check your Teachable Machine share URL.");
+                alert("모델 동기화 실패! 티처블 머신 공유 링크를 확인하세요.");
                 startBtn.disabled = false;
-                startBtn.innerHTML = `<i class="fa-solid fa-power-off"></i> ${translations[currentLang].startBtn}`;
+                startBtn.innerHTML = `<i class="fa-solid fa-play"></i> ${translations[currentLang].startBtn}`;
             }
         }
 
@@ -296,20 +313,53 @@
 
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
-            for (let i = 0; i < maxPredictions; i++) {
-                const className = prediction[i].className;
-                const probability = (prediction[i].probability * 100).toFixed(1);
-
-                const nameEl = document.getElementById(`label-name-${i}`);
-                const probEl = document.getElementById(`label-prob-${i}`);
-                const barEl = document.getElementById(`bar-${i}`);
-
-                if (nameEl && probEl && barEl) {
-                    nameEl.innerText = className.toUpperCase();
-                    probEl.innerText = `${probability}%`;
-                    barEl.style.width = `${probability}%`;
+            
+            // 가장 높은 확률을 가진 클래스 탐색
+            let topPrediction = prediction[0];
+            for (let i = 1; i < maxPredictions; i++) {
+                if (prediction[i].probability > topPrediction.probability) {
+                    topPrediction = prediction[i];
                 }
             }
+
+            const currentProbVal = topPrediction.probability;
+            const percentage = (currentProbVal * 100).toFixed(1);
+
+            // 1. 새로운 시각화 메커니즘 (코어 링 동적 반응 업데이트)
+            document.getElementById('coreTopLabel').innerText = currentLang === 'ko' ? "현재 인식 상태" : "ACTIVE STATE";
+            document.getElementById('coreMainProb').innerText = `${percentage}%`;
+            document.getElementById('coreSubClass').innerText = topPrediction.className.toUpperCase();
+            
+            // 확률에 따라 코어 링의 숨쉬는 속도 및 크기 동적 조절
+            const pulseRing = document.getElementById('pulseCoreRing');
+            const scaleFactor = 1 + (currentProbVal * 0.1);
+            pulseRing.style.transform = `scale(${scaleFactor})`;
+
+            // 2. 실시간 변화 속도 (Velocity) 계산 및 조정 반영
+            const now = Date.now();
+            const timeDiff = (now - lastTime) / 1000; // 초 단위 시간차
+            if (timeDiff > 0.1) { // 100ms마다 속도 갱신
+                const sensitivity = parseFloat(document.getElementById('sensitivitySlider').value);
+                const probDiff = Math.abs(currentProbVal - lastTopProb);
+                const velocity = ((probDiff / timeDiff) * 100 * sensitivity).toFixed(1);
+                
+                document.getElementById('velocityValue').innerText = `${velocity} px/s`;
+                lastTopProb = currentProbVal;
+                lastTime = now;
+            }
+
+            // 3. 하단 서브 칩 리스트 업데이트
+            let subHTML = "";
+            for (let i = 0; i < maxPredictions; i++) {
+                const p = (prediction[i].probability * 100).toFixed(0);
+                subHTML += `
+                    <div class="p-2.5 rounded-xl border flex items-center justify-between text-xs" style="background-color: var(--accent-sub); border-color: var(--border-card);">
+                        <span class="font-medium truncate max-w-[90px]">${prediction[i].className}</span>
+                        <span class="font-bold text-[#E07A5F]">${p}%</span>
+                    </div>
+                `;
+            }
+            document.getElementById('label-container').innerHTML = subHTML;
         }
     </script>
 </body>
