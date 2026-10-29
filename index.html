@@ -1,434 +1,679 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="light">
+<html lang="ko" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>실시간 상태 모니터링</title>
-    
-    <!-- Tailwind CSS -->
+    <title>AI Vision Analytics Platform</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
+                    colors: {
+                        glass: {
+                            light: 'rgba(255, 255, 255, 0.65)',
+                            dark: 'rgba(15, 23, 42, 0.65)',
+                            borderLight: 'rgba(255, 255, 255, 0.4)',
+                            borderDark: 'rgba(255, 255, 255, 0.1)',
+                        }
                     },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.6', filter: 'drop-shadow(0 0 15px rgba(99, 102, 241, 0.6))' },
+                            '50%': { opacity: '1', filter: 'drop-shadow(0 0 25px rgba(168, 85, 247, 0.8))' }
+                        }
+                    }
                 }
             }
         }
     </script>
-
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .modern-font {
-            font-family: 'Outfit', sans-serif;
-        }
-        
-        :root {
-            --bg-main: #0F172A;
-            --bg-card: rgba(30, 41, 59, 0.75);
-            --border-card: rgba(51, 65, 85, 0.8);
-            --text-main: #F8FAFC;
-            --text-sub: #94A3B8;
-            --accent-warm: #38BDF8;
-            --accent-sub: rgba(15, 23, 42, 0.5);
-        }
-        [data-theme="light"] {
-            --bg-main: #F8FAFC;
-            --bg-card: rgba(255, 255, 255, 0.85);
-            --border-card: rgba(226, 232, 240, 0.9);
-            --text-main: #0F172A;
-            --text-sub: #64748B;
-            --accent-warm: #0284C7;
-            --accent-sub: rgba(241, 245, 249, 0.9);
-        }
-
-        .glass-card {
-            background-color: var(--bg-card);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border-card);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        .glass-header {
-            background-color: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-card);
-        }
-
-        .ui-control-box {
-            background-color: var(--accent-sub);
-            border: 1px solid var(--border-card);
-            color: var(--text-main);
-            transition: border-color 0.2s ease;
-        }
-        .ui-control-box:hover {
-            border-color: var(--accent-warm);
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between">
-
-    <!-- Header -->
-    <header class="sticky top-0 z-50 glass-header">
-        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid fa-bolt text-lg"></i>
-                </div>
-                <div>
-                    <span class="modern-font text-lg font-bold tracking-tight" data-i18n="headerTitle">상태 모니터링</span>
-                    <span class="block text-[10px] tracking-widest font-semibold uppercase opacity-60" data-i18n="headerSub">실시간 현황판</span>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-3">
-                <!-- 언어 선택 드롭다운 -->
-                <div class="relative">
-                    <select id="langSelect" class="ui-control-box text-xs rounded-xl px-4 py-2.5 outline-none cursor-pointer font-medium appearance-none pr-9 shadow-sm">
-                        <option value="ko" style="background: var(--bg-main); color: var(--text-main);">🇰🇷 한국어</option>
-                        <option value="en" style="background: var(--bg-main); color: var(--text-main);">🇺🇸 English</option>
-                        <option value="ja" style="background: var(--bg-main); color: var(--text-main);">🇯🇵 日本語</option>
-                        <option value="zh" style="background: var(--bg-main); color: var(--text-main);">🇨🇳 中文</option>
-                    </select>
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-[10px]">
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                </div>
-
-                <!-- 테마 토글 버튼 -->
-                <button id="themeToggle" class="ui-control-box w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer">
-                    <i id="themeIcon" class="fa-solid fa-moon text-sky-400 text-sm"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Grid -->
-    <main class="max-w-6xl mx-auto px-6 py-8 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
-        
-        <!-- Left: Webcam Section -->
-        <div class="lg:col-span-7 flex flex-col space-y-6">
-            <div class="glass-card rounded-3xl p-6">
-                <div class="flex items-center justify-between mb-5">
-                    <h2 class="modern-font text-sm font-bold flex items-center space-x-2 tracking-wide">
-                        <i class="fa-solid fa-video text-sky-400"></i>
-                        <span data-i18n="feedTitle">실시간 카메라 영상</span>
-                    </h2>
-                    
-                    <button id="camToggleBtn" onclick="toggleCamera()" class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-md text-xs flex items-center space-x-2 active:scale-95 cursor-pointer">
-                        <i id="camBtnIcon" class="fa-solid fa-play"></i>
-                        <span id="camBtnText" data-i18n="startBtn">카메라 시작하기</span>
-                    </button>
-                </div>
-
-                <div class="relative aspect-video w-full bg-black/20 rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center shadow-inner">
-                    <div id="webcam-container" class="w-full h-full flex items-center justify-center">
-                        <div id="placeholderText" class="text-center p-6 opacity-50 flex flex-col items-center space-y-3">
-                            <i class="fa-solid fa-camera text-4xl text-sky-400"></i>
-                            <p class="text-xs font-medium tracking-wide" data-i18n="placeholder">버튼을 눌러 카메라를 연결하세요.</p>
-                        </div>
-                    </div>
-                    <div class="absolute top-4 left-4 backdrop-blur-md border px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center space-x-2 shadow-sm" style="background-color: var(--bg-card); border-color: var(--border-card);">
-                        <span class="w-2 h-2 rounded-full bg-amber-400" id="statusDot"></span>
-                        <span id="statusText" data-i18n="statusStandby">대기 중</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: Status Section -->
-        <div class="lg:col-span-5 flex flex-col space-y-6">
-            <div class="glass-card rounded-3xl p-6 flex flex-col items-center text-center">
-                <h2 class="modern-font text-sm font-bold flex items-center space-x-2 mb-6 w-full justify-start tracking-wide">
-                    <i class="fa-solid fa-chart-pie text-sky-400"></i>
-                    <span data-i18n="analyticsTitle">현재 인식 상태</span>
-                </h2>
-
-                <div class="relative w-48 h-48 my-4 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full border-4 border-dashed border-sky-400/20"></div>
-                    <div class="absolute inset-3 rounded-full flex flex-col items-center justify-center p-4 shadow-inner" style="background-color: var(--accent-sub);">
-                        <span class="text-[11px] font-semibold uppercase opacity-60 mb-1 tracking-wider" data-i18n="currentState">현재 상태</span>
-                        <span id="coreMainClassName" class="modern-font text-2xl font-bold text-sky-400 truncate max-w-[150px]">-</span>
-                    </div>
-                </div>
-
-                <div class="w-full mt-4 pt-4 border-t text-xs text-left opacity-60 leading-relaxed" style="border-color: var(--border-card);" data-i18n="guideText">
-                    * 카메라 화면을 분석하여 해당하는 상태를 표시합니다.
-                </div>
-            </div>
-
-            <div id="label-container" class="glass-card rounded-2xl p-4 grid grid-cols-2 gap-3">
-                <div class="col-span-2 text-center py-4 text-xs opacity-50 font-medium" data-i18n="waitingModel">
-                    모델 로딩 대기 중...
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t py-6 text-center text-xs opacity-50" style="border-color: var(--border-card);">
-        <p>&copy; 2026 AI MONITORING SYSTEM. ALL RIGHTS RESERVED.</p>
-    </footer>
-
-    <!-- Scripts -->
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- TensorFlow.js and Teachable Machine Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        /* Custom Glassmorphism Effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .dark .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+        .dark .glass-button:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white transition-colors duration-500 relative overflow-x-hidden">
+
+    <!-- Subtle Ambient Background Glows -->
+    <div class="fixed top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-indigo-500/20 dark:bg-indigo-600/15 blur-[120px] pointer-events-none -z-10"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-purple-500/20 dark:bg-purple-600/15 blur-[120px] pointer-events-none -z-10"></div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 w-full px-4 lg:px-8 py-3">
+        <nav class="max-w-7xl mx-auto glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between transition-all duration-300">
+            <!-- Brand Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-microchip text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">
+                        VISION.AI
+                    </h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase" data-i18n="subtitle">
+                        Deep Learning Classification
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controls: Status Indicator, Language, Theme -->
+            <div class="flex items-center space-x-3">
+                <!-- Live Model Status Badge -->
+                <div id="statusBadge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="statusText" data-i18n="statusLoading">모델 로딩 중...</span>
+                </div>
+
+                <!-- Language Selector -->
+                <button id="langToggleBtn" onclick="toggleLanguage()" class="glass-button px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                    <i class="fa-solid fa-globe text-slate-500 dark:text-slate-400"></i>
+                    <span id="langText">EN</span>
+                </button>
+
+                <!-- Dark / Light Theme Toggle -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="glass-button w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-transform duration-300 active:scale-95" aria-label="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon text-indigo-400"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 flex-grow flex flex-col gap-6">
+
+        <!-- Hero Section -->
+        <section class="text-center py-4 sm:py-6 max-w-3xl mx-auto space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 backdrop-blur-sm">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span data-i18n="heroBadge">Teachable Machine v2 연동</span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="heroTitle">
+                실시간 인공지능 시각 분석
+            </h2>
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed" data-i18n="heroDesc">
+                웹캠을 활성화하거나 이미지를 업로드하여 사전 학습된 딥러닝 신경망 모델을 실시간으로 테스트하세요.
+            </p>
+        </section>
+
+        <!-- Main Workspace: Camera/Upload & Visualized Results -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Left Box: Media Viewport (Webcam / Image Drop zone) -->
+            <div class="lg:col-span-7 glass-panel rounded-3xl p-5 sm:p-6 space-y-4 relative overflow-hidden group">
+                
+                <!-- Viewport Control Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-camera text-indigo-500"></i>
+                        <h3 class="font-semibold text-sm sm:text-base" data-i18n="inputSource">입력 소스</h3>
+                    </div>
+                    <div class="flex space-x-2">
+                        <!-- Switch Tabs: Webcam vs File Upload -->
+                        <button id="modeWebcamBtn" onclick="switchInputMode('webcam')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-md shadow-indigo-500/20">
+                            <i class="fa-solid fa-video mr-1"></i> <span data-i18n="tabWebcam">웹캠</span>
+                        </button>
+                        <button id="modeUploadBtn" onclick="switchInputMode('upload')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass-button text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-upload mr-1"></i> <span data-i18n="tabUpload">업로드</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Media Display Canvas -->
+                <div id="viewportContainer" class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900/80 flex items-center justify-center border border-slate-700/50 group/canvas shadow-inner">
+                    
+                    <!-- Overlay Grid Visual Effect -->
+                    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+
+                    <!-- Webcam Container -->
+                    <div id="webcamWrapper" class="w-full h-full flex items-center justify-center relative">
+                        <div id="webcamContainer" class="w-full h-full flex items-center justify-center">
+                            <!-- Canvas injected dynamically via JavaScript -->
+                        </div>
+                        <div id="webcamPlaceholder" class="flex flex-col items-center justify-center text-slate-400 space-y-3">
+                            <div class="w-16 h-16 rounded-2xl glass-button flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-video-slash"></i>
+                            </div>
+                            <p class="text-xs font-medium" data-i18n="webcamOff">웹캠이 비활성화되어 있습니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Preview Wrapper -->
+                    <div id="uploadWrapper" class="hidden w-full h-full flex flex-col items-center justify-center p-4">
+                        <img id="imagePreview" class="max-w-full max-h-full object-contain rounded-xl hidden shadow-lg" alt="Upload Preview">
+                        <label id="uploadDropzone" for="imageInput" class="cursor-pointer w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-600/50 rounded-xl hover:border-indigo-500 transition-colors p-6 text-center space-y-3">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400"></i>
+                            <div>
+                                <p class="text-xs sm:text-sm font-medium" data-i18n="dropzoneText">클릭하거나 이미지를 여기에 끌어다 놓으세요</p>
+                                <p class="text-[10px] text-slate-400 mt-1">PNG, JPG, WEBP (Max 10MB)</p>
+                            </div>
+                        </label>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </div>
+
+                    <!-- Performance HUD Overlay -->
+                    <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg glass-panel text-[11px] font-mono text-slate-300 flex items-center space-x-3 border border-white/10 backdrop-blur-md pointer-events-none">
+                        <div>FPS: <span id="fpsValue" class="text-indigo-400 font-bold">0</span></div>
+                        <div class="h-3 w-[1px] bg-slate-700"></div>
+                        <div>LATENCY: <span id="latencyValue" class="text-purple-400 font-bold">0ms</span></div>
+                    </div>
+
+                    <!-- Snapshot Flash Effect -->
+                    <div id="flashEffect" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-200"></div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div class="flex items-center space-x-2">
+                        <button id="startCamBtn" onclick="toggleWebcam()" disabled class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-play"></i>
+                            <span id="startCamText" data-i18n="startCam">카메라 시작</span>
+                        </button>
+                        <button onclick="captureSnapshot()" class="glass-button p-2.5 rounded-xl text-slate-700 dark:text-slate-200 hover:text-indigo-500 transition-colors" title="Snapshot">
+                            <i class="fa-solid fa-camera-retro text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                        <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+                        <span data-i18n="privacyNotice">모든 영상 처리 과정은 브라우저 내부에서 실행됩니다.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Box: Classification Probability Output -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-panel rounded-3xl p-5 sm:p-6 space-y-5">
+                    
+                    <!-- Box Header -->
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200/50 dark:border-slate-800/50">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-chart-bar text-purple-500"></i>
+                            <h3 class="font-semibold text-sm sm:text-base" data-i18n="analysisTitle">실시간 추론 결과</h3>
+                        </div>
+                        <span id="detectedClassCount" class="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 font-mono">0 Classes</span>
+                    </div>
+
+                    <!-- Top Class Output Summary Card -->
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 relative overflow-hidden">
+                        <div class="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1" data-i18n="topPrediction">
+                            최고 신뢰도 예측
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div id="topClassLabel" class="text-xl font-bold text-slate-800 dark:text-slate-100">
+                                ---
+                            </div>
+                            <div id="topClassScore" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">
+                                0.0%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar List Container -->
+                    <div id="predictionsContainer" class="space-y-4 py-2">
+                        <!-- Dynamic probability items will be inserted here -->
+                        <div class="text-center py-8 text-slate-400 text-xs flex flex-col items-center space-y-2">
+                            <i class="fa-solid fa-spinner animate-spin text-lg text-indigo-500"></i>
+                            <span data-i18n="waitingInput">모델 준비 및 영상 입력을 기다리는 중...</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Recent Snapshots / History Card -->
+                <div class="glass-panel rounded-3xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-semibold text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            <span data-i18n="historyTitle">최근 스냅샷 로그</span>
+                        </h4>
+                        <button onclick="clearHistory()" class="text-[10px] text-slate-400 hover:text-red-400 transition-colors" data-i18n="clearHistory">
+                            기록 삭제
+                        </button>
+                    </div>
+                    <div id="historyContainer" class="flex space-x-2 overflow-x-auto pb-2 min-h-[64px] items-center">
+                        <p id="emptyHistoryText" class="text-xs text-slate-400 italic w-full text-center" data-i18n="noSnapshots">저장된 스냅샷이 없습니다.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full px-4 lg:px-8 py-6 mt-6">
+        <div class="max-w-7xl mx-auto glass-panel rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-3">
+            <div class="flex items-center space-x-2">
+                <span>© 2026 Vision AI Hub. Powered by Teachable Machine.</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="https://teachablemachine.withgoogle.com/models/oSBY98zcO/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-500 transition-colors flex items-center space-x-1">
+                    <span>Model Source</span>
+                    <i class="fa-solid fa-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
     <script>
-        const translations = {
+        // Teachable Machine Target Model URL
+        const MODEL_URL = "https://teachablemachine.withgoogle.com/models/oSBY98zcO/";
+
+        // Global Application State
+        let model, webcam, maxPredictions;
+        let isWebcamActive = false;
+        let currentMode = 'webcam'; // 'webcam' | 'upload'
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let currentLang = 'ko';
+
+        // Translations Dictionary
+        const i18n = {
             ko: {
-                headerTitle: "상태 모니터링",
-                headerSub: "실시간 현황판",
-                feedTitle: "실시간 카메라 영상",
-                startBtn: "카메라 시작하기",
-                stopBtn: "카메라 끄기",
-                placeholder: "버튼을 눌러 카메라를 연결하세요.",
-                statusStandby: "대기 중",
-                statusActive: "분석 작동 중",
-                analyticsTitle: "현재 인식 상태",
-                currentState: "현재 상태",
-                guideText: "* 카메라 화면을 분석하여 해당하는 상태를 표시합니다.",
-                waitingModel: "모델 로딩 대기 중...",
-                errorMsg: "카메라 권한을 확인하거나 장치를 연결할 수 없습니다."
+                subtitle: "딥러닝 시각 인식 시스템",
+                statusLoading: "모델 로딩 중...",
+                statusReady: "모델 준비 완료",
+                statusActive: "실시간 감지 중",
+                heroBadge: "Teachable Machine v2 연동",
+                heroTitle: "실시간 인공지능 시각 분석",
+                heroDesc: "웹캠을 활성화하거나 이미지를 업로드하여 사전 학습된 딥러닝 신경망 모델을 실시간으로 테스트하세요.",
+                inputSource: "입력 소스",
+                tabWebcam: "웹캠",
+                tabUpload: "업로드",
+                webcamOff: "웹캠이 비활성화되어 있습니다.",
+                dropzoneText: "클릭하거나 이미지를 여기에 끌어다 놓으세요",
+                startCam: "카메라 시작",
+                stopCam: "카메라 중지",
+                privacyNotice: "모든 영상 처리 과정은 브라우저 내부에서 실행됩니다.",
+                analysisTitle: "실시간 추론 결과",
+                topPrediction: "최고 신뢰도 예측",
+                waitingInput: "모델 준비 및 영상 입력을 기다리는 중...",
+                historyTitle: "최근 스냅샷 로그",
+                clearHistory: "기록 삭제",
+                noSnapshots: "저장된 스냅샷이 없습니다."
             },
             en: {
-                headerTitle: "Status Monitor",
-                headerSub: "Live Dashboard",
-                feedTitle: "Live Camera Stream",
-                startBtn: "Start Camera",
-                stopBtn: "Stop Camera",
-                placeholder: "Click to connect camera.",
-                statusStandby: "Standby",
-                statusActive: "Monitoring",
-                analyticsTitle: "Current Status",
-                currentState: "Status",
-                guideText: "* Displays the detected state in real time.",
-                waitingModel: "Waiting for model...",
-                errorMsg: "Could not access camera or load model."
-            },
-            ja: {
-                headerTitle: "状態モニタリング",
-                headerSub: "リアルタイム状況盤",
-                feedTitle: "ライブカメラ映像",
-                startBtn: "カメラ開始",
-                stopBtn: "カメラ停止",
-                placeholder: "ボタンを押してカメラを接続してください。",
-                statusStandby: "待機中",
-                statusActive: "分析中",
-                analyticsTitle: "現在の認識状態",
-                currentState: "現在の状態",
-                guideText: "* カメラ映像を分析し、状態を表示します。",
-                waitingModel: "モデルの読み込み待ち...",
-                errorMsg: "カメラへのアクセスに失敗しました。"
-            },
-            zh: {
-                headerTitle: "状态监控",
-                headerSub: "实时状态面板",
-                feedTitle: "实时相机画面",
-                startBtn: "开启相机",
-                stopBtn: "关闭相机",
-                placeholder: "点击按钮连接相机。",
-                statusStandby: "待机中",
-                statusActive: "监控中",
-                analyticsTitle: "当前识别状态",
-                currentState: "当前状态",
-                guideText: "* 分析相机画面并显示对应状态。",
-                waitingModel: "等待模型加载中...",
-                errorMsg: "无法访问相机或加载模型。"
+                subtitle: "Deep Learning Visual System",
+                statusLoading: "Loading Model...",
+                statusReady: "Model Ready",
+                statusActive: "Live Detecting",
+                heroBadge: "Teachable Machine v2 Powered",
+                heroTitle: "Real-time AI Visual Analytics",
+                heroDesc: "Activate your webcam or upload images to test pre-trained neural networks with instant confidence feedback.",
+                inputSource: "Input Source",
+                tabWebcam: "Webcam",
+                tabUpload: "Upload",
+                webcamOff: "Webcam is currently inactive.",
+                dropzoneText: "Click or drag and drop image here",
+                startCam: "Start Camera",
+                stopCam: "Stop Camera",
+                privacyNotice: "All vision computation is processed client-side locally.",
+                analysisTitle: "Inference Results",
+                topPrediction: "Top Confidence Result",
+                waitingInput: "Awaiting camera startup or image upload...",
+                historyTitle: "Snapshot Logs",
+                clearHistory: "Clear Logs",
+                noSnapshots: "No snapshots saved yet."
             }
         };
 
-        let currentLang = 'ko';
-        const langSelect = document.getElementById('langSelect');
-
-        langSelect.addEventListener('change', (e) => {
-            currentLang = e.target.value;
-            updateTexts();
+        // On Page Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            initTheme();
+            await loadModel();
         });
 
-        function updateTexts() {
-            // [핵심 수정]: data-i18n 속성을 가진 모든 요소를 찾아 현재 언어로 즉시 텍스트 변경
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[currentLang] && translations[currentLang][key]) {
-                    el.innerText = translations[currentLang][key];
-                }
-            });
-            
-            // 버튼 상태에 따른 텍스트 동기화
-            if (isCameraOn) {
-                document.getElementById('camBtnText').innerText = translations[currentLang].stopBtn;
-                document.getElementById('statusText').innerText = translations[currentLang].statusActive;
-            } else {
-                document.getElementById('camBtnText').innerText = translations[currentLang].startBtn;
-                document.getElementById('statusText').innerText = translations[currentLang].statusStandby;
-            }
-        }
-
-        const themeToggleBtn = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const htmlElement = document.documentElement;
-
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = htmlElement.getAttribute('data-theme');
-            if (currentTheme === 'light') {
-                htmlElement.setAttribute('data-theme', 'dark');
-                themeIcon.className = "fa-solid fa-sun text-amber-400 text-sm";
-            } else {
-                htmlElement.setAttribute('data-theme', 'light');
-                themeIcon.className = "fa-solid fa-moon text-sky-400 text-sm";
-            }
-        });
-
-        const URL = "https://teachablemachine.withgoogle.com/models/QUqC192tV/";
-        const BASE_URL = URL.endsWith('/') ? URL : URL + '/';
-
-        let model, webcam, maxPredictions;
-        let isModelLoaded = false;
-        let isCameraOn = false;
-        let animationId = null;
-
-        async function toggleCamera() {
-            if (!isCameraOn) {
-                await startCamera();
-            } else {
-                stopCamera();
-            }
-        }
-
-        async function startCamera() {
-            const camBtnText = document.getElementById('camBtnText');
-            const camBtnIcon = document.getElementById('camBtnIcon');
-            const camToggleBtn = document.getElementById('camToggleBtn');
-            
-            camToggleBtn.disabled = true;
-            camBtnText.innerText = "...";
+        // Initialize / Load Teachable Machine Model
+        async function loadModel() {
+            const modelURL = MODEL_URL + "model.json";
+            const metadataURL = MODEL_URL + "metadata.json";
 
             try {
-                if (!isModelLoaded) {
-                    model = await tmImage.load(BASE_URL + "model.json", BASE_URL + "metadata.json");
-                    maxPredictions = model.getTotalClasses();
-                    isModelLoaded = true;
-                }
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
 
-                if (webcam) {
-                    try { await webcam.stop(); } catch(e) {}
-                    webcam = null;
-                }
+                // Update UI state
+                document.getElementById('statusBadge').className = "hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+                document.getElementById('statusText').innerText = i18n[currentLang].statusReady;
+                document.getElementById('startCamBtn').disabled = false;
+                document.getElementById('detectedClassCount').innerText = `${maxPredictions} Classes`;
 
-                webcam = new tmImage.Webcam(420, 315, true);
-                await webcam.setup();
-                await webcam.play();
-                
-                const webcamContainer = document.getElementById("webcam-container");
-                webcamContainer.innerHTML = "";
-                webcamContainer.appendChild(webcam.canvas);
-
-                isCameraOn = true;
-                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]";
-                document.getElementById('statusText').innerText = translations[currentLang].statusActive;
-                
-                camBtnIcon.className = "fa-solid fa-stop";
-                camBtnText.innerText = translations[currentLang].stopBtn;
-                camToggleBtn.disabled = false;
-
-                window.requestAnimationFrame(loop);
-
+                // Render initial prediction bar placeholders
+                setupPredictionBars();
             } catch (error) {
-                console.error("Camera error:", error);
-                alert(translations[currentLang].errorMsg);
-                camToggleBtn.disabled = false;
-                camBtnIcon.className = "fa-solid fa-play";
-                camBtnText.innerText = translations[currentLang].startBtn;
+                console.error("Model loading failed:", error);
+                document.getElementById('statusText').innerText = "모델 로드 실패";
             }
         }
 
-        function stopCamera() {
-            isCameraOn = false;
-            
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
+        // Setup HTML Skeleton for Predictions
+        function setupPredictionBars() {
+            const container = document.getElementById('predictionsContainer');
+            container.innerHTML = '';
 
-            if (webcam) {
-                try { webcam.stop(); } catch(e) {}
-            }
-
-            document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-amber-400";
-            document.getElementById('statusText').innerText = translations[currentLang].statusStandby;
-
-            document.getElementById('camBtnIcon').className = "fa-solid fa-play";
-            document.getElementById('camBtnText').innerText = translations[currentLang].startBtn;
-
-            document.getElementById("webcam-container").innerHTML = `
-                <div id="placeholderText" class="text-center p-6 opacity-50 flex flex-col items-center space-y-3">
-                    <i class="fa-solid fa-camera text-4xl text-sky-400"></i>
-                    <p class="text-xs">${translations[currentLang].placeholder}</p>
-                </div>
-            `;
-
-            document.getElementById('coreMainClassName').innerText = "-";
-            document.getElementById('label-container').innerHTML = `
-                <div class="col-span-2 text-center py-4 text-xs opacity-50 font-medium" data-i18n="waitingModel">
-                    ${translations[currentLang].waitingModel}
-                </div>
-            `;
-        }
-
-        async function loop() {
-            if (!isCameraOn || !webcam) return;
-            webcam.update();
-            await predict();
-            if (isCameraOn) {
-                animationId = window.requestAnimationFrame(loop);
-            }
-        }
-
-        async function predict() {
-            if (!isCameraOn || !model || !webcam) return;
-            const prediction = await model.predict(webcam.canvas);
-            
-            let topPrediction = prediction[0];
-            for (let i = 1; i < maxPredictions; i++) {
-                if (prediction[i].probability > topPrediction.probability) {
-                    topPrediction = prediction[i];
-                }
-            }
-
-            document.getElementById('coreMainClassName').innerText = topPrediction.className;
-
-            let subHTML = "";
             for (let i = 0; i < maxPredictions; i++) {
-                const isActive = prediction[i].className === topPrediction.className;
-                const activeStyle = isActive ? "border-sky-400 bg-sky-400/10 font-bold text-sky-400 shadow-sm" : "opacity-60";
-                
-                subHTML += `
-                    <div class="p-2.5 rounded-xl border flex items-center justify-center text-xs transition duration-200 ${activeStyle}" style="border-color: var(--border-card);">
-                        <span class="truncate">${prediction[i].className}</span>
+                const classTitle = model.getClassLabels()[i] || `Class ${i + 1}`;
+                const barHTML = `
+                    <div class="space-y-1.5" id="class-group-${i}">
+                        <div class="flex justify-between items-center text-xs font-medium">
+                            <span class="text-slate-700 dark:text-slate-300 font-semibold flex items-center space-x-1.5">
+                                <span class="w-2 h-2 rounded-full bg-slate-400" id="class-dot-${i}"></span>
+                                <span>${classTitle}</span>
+                            </span>
+                            <span id="class-val-${i}" class="font-mono text-slate-500 dark:text-slate-400">0.0%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-300/30 dark:border-slate-700/30">
+                            <div id="class-bar-${i}" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300 w-0"></div>
+                        </div>
                     </div>
                 `;
+                container.insertAdjacentHTML('beforeend', barHTML);
             }
-            document.getElementById('label-container').innerHTML = subHTML;
+        }
+
+        // Toggle Webcam Live Feed
+        async function toggleWebcam() {
+            if (isWebcamActive) {
+                stopWebcam();
+            } else {
+                await startWebcam();
+            }
+        }
+
+        async function startWebcam() {
+            if (!model) return;
+
+            const flip = true; 
+            webcam = new tmImage.Webcam(400, 400, flip);
+            await webcam.setup();
+            await webcam.play();
+            
+            isWebcamActive = true;
+            document.getElementById('webcamPlaceholder').classList.add('hidden');
+            
+            const webcamContainer = document.getElementById('webcamContainer');
+            webcamContainer.innerHTML = '';
+            webcamContainer.appendChild(webcam.canvas);
+            webcam.canvas.className = "w-full h-full object-cover rounded-xl";
+
+            // Update UI Button State
+            const btn = document.getElementById('startCamBtn');
+            btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30 transition-all duration-300 flex items-center space-x-2";
+            document.getElementById('startCamText').innerText = i18n[currentLang].stopCam;
+
+            document.getElementById('statusText').innerText = i18n[currentLang].statusActive;
+
+            window.requestAnimationFrame(webcamLoop);
+        }
+
+        function stopWebcam() {
+            if (webcam) {
+                webcam.stop();
+            }
+            isWebcamActive = false;
+            document.getElementById('webcamPlaceholder').classList.remove('hidden');
+            document.getElementById('webcamContainer').innerHTML = '';
+
+            const btn = document.getElementById('startCamBtn');
+            btn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all duration-300 flex items-center space-x-2";
+            document.getElementById('startCamText').innerText = i18n[currentLang].startCam;
+
+            document.getElementById('statusText').innerText = i18n[currentLang].statusReady;
+        }
+
+        // Continuous Loop for Webcam Inference
+        async function webcamLoop(timestamp) {
+            if (!isWebcamActive) return;
+
+            webcam.update();
+            const startTime = performance.now();
+            await predict(webcam.canvas);
+            const endTime = performance.now();
+
+            // Calculate FPS & Latency
+            frameCount++;
+            if (timestamp - lastFrameTime >= 1000) {
+                document.getElementById('fpsValue').innerText = frameCount;
+                frameCount = 0;
+                lastFrameTime = timestamp;
+            }
+            document.getElementById('latencyValue').innerText = Math.round(endTime - startTime) + 'ms';
+
+            window.requestAnimationFrame(webcamLoop);
+        }
+
+        // Predict Function (Handles both canvas and img)
+        async function predict(imageElement) {
+            const predictions = await model.predict(imageElement);
+            let topPrediction = { className: "", probability: 0 };
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const prob = predictions[i].probability;
+                const percentage = (prob * 100).toFixed(1) + '%';
+                
+                const bar = document.getElementById(`class-bar-${i}`);
+                const val = document.getElementById(`class-val-${i}`);
+                const dot = document.getElementById(`class-dot-${i}`);
+
+                if (bar) bar.style.width = percentage;
+                if (val) val.innerText = percentage;
+
+                // Highlight Active Class
+                if (prob > 0.5) {
+                    dot.className = "w-2 h-2 rounded-full bg-indigo-500 animate-ping";
+                } else {
+                    dot.className = "w-2 h-2 rounded-full bg-slate-400";
+                }
+
+                if (prob > topPrediction.probability) {
+                    topPrediction = predictions[i];
+                }
+            }
+
+            // Update Top Prediction Summary Card
+            document.getElementById('topClassLabel').innerText = topPrediction.className || "Uncertain";
+            document.getElementById('topClassScore').innerText = (topPrediction.probability * 100).toFixed(1) + '%';
+        }
+
+        // Input Mode Switcher (Webcam vs Upload)
+        function switchInputMode(mode) {
+            currentMode = mode;
+            const webcamWrapper = document.getElementById('webcamWrapper');
+            const uploadWrapper = document.getElementById('uploadWrapper');
+            const webcamBtn = document.getElementById('modeWebcamBtn');
+            const uploadBtn = document.getElementById('modeUploadBtn');
+
+            if (mode === 'webcam') {
+                webcamWrapper.classList.remove('hidden');
+                uploadWrapper.classList.add('hidden');
+                webcamBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-md shadow-indigo-500/20";
+                uploadBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass-button text-slate-600 dark:text-slate-300";
+            } else {
+                stopWebcam();
+                webcamWrapper.classList.add('hidden');
+                uploadWrapper.classList.remove('hidden');
+                uploadBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-indigo-600 text-white shadow-md shadow-indigo-500/20";
+                webcamBtn.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass-button text-slate-600 dark:text-slate-300";
+            }
+        }
+
+        // Handle Image File Upload
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                document.getElementById('uploadDropzone').classList.add('hidden');
+
+                img.onload = async () => {
+                    await predict(img);
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Capture Snapshot & Store in Log Card
+        function captureSnapshot() {
+            let canvasSource = null;
+
+            if (currentMode === 'webcam' && isWebcamActive && webcam) {
+                canvasSource = webcam.canvas;
+            } else if (currentMode === 'upload') {
+                const img = document.getElementById('imagePreview');
+                if (!img.classList.contains('hidden')) {
+                    canvasSource = img;
+                }
+            }
+
+            if (!canvasSource) return;
+
+            // Trigger Visual Flash Animation
+            const flash = document.getElementById('flashEffect');
+            flash.style.opacity = '0.8';
+            setTimeout(() => { flash.style.opacity = '0'; }, 200);
+
+            // Create Thumbnail Canvas
+            const thumbCanvas = document.createElement('canvas');
+            thumbCanvas.width = 64;
+            thumbCanvas.height = 64;
+            const ctx = thumbCanvas.getContext('2d');
+            ctx.drawImage(canvasSource, 0, 0, 64, 64);
+
+            const dataUrl = thumbCanvas.toDataURL('image/png');
+            const historyContainer = document.getElementById('historyContainer');
+            const emptyText = document.getElementById('emptyHistoryText');
+
+            if (emptyText) emptyText.remove();
+
+            const imgElement = document.createElement('img');
+            imgElement.src = dataUrl;
+            imgElement.className = "w-12 h-12 rounded-xl object-cover border border-indigo-500/30 hover:scale-110 transition-transform cursor-pointer shadow-md flex-shrink-0";
+            imgElement.title = `Captured at ${new Date().toLocaleTimeString()}`;
+
+            historyContainer.prepend(imgElement);
+        }
+
+        function clearHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            historyContainer.innerHTML = `<p id="emptyHistoryText" class="text-xs text-slate-400 italic w-full text-center" data-i18n="noSnapshots">${i18n[currentLang].noSnapshots}</p>`;
+        }
+
+        // Language Switcher
+        function toggleLanguage() {
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            document.getElementById('langText').innerText = currentLang.toUpperCase();
+
+            // Update UI Strings
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerText = i18n[currentLang][key];
+                }
+            });
+
+            // Update Webcam Button Text dynamically
+            if (isWebcamActive) {
+                document.getElementById('startCamText').innerText = i18n[currentLang].stopCam;
+            } else {
+                document.getElementById('startCamText').innerText = i18n[currentLang].startCam;
+            }
+        }
+
+        // Dark / Light Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = "fa-solid fa-sun text-amber-500";
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                icon.className = "fa-solid fa-moon text-indigo-400";
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const icon = document.getElementById('themeIcon');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                icon.className = "fa-solid fa-sun text-amber-500";
+            } else {
+                document.documentElement.classList.add('dark');
+                icon.className = "fa-solid fa-moon text-indigo-400";
+            }
         }
     </script>
 </body>
